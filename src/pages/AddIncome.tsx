@@ -1,0 +1,164 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { incomeApi } from '../services/api';
+import { getTodayDate } from '../utils/format';
+
+const INCOME_TYPES = ['工资', '奖金', '投资收益', '兼职', '其他'];
+
+export default function AddIncome() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    amount: '',
+    type: INCOME_TYPES[0],
+    income_time: getTodayDate()
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      setError('请输入有效的金额');
+      return;
+    }
+
+    if (!formData.type) {
+      setError('请选择收入类型');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await incomeApi.create({
+        amount: parseFloat(formData.amount),
+        type: formData.type,
+        income_time: formData.income_time
+      });
+
+      if (response.code === 200) {
+        navigate('/home');
+      } else {
+        setError(response.message || '创建失败');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || '创建失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="page">
+      <div className="container" style={{ maxWidth: '500px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', marginTop: '20px' }}>
+          <button
+            onClick={() => navigate('/home')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: 'white',
+              marginRight: '12px'
+            }}
+          >
+            ←
+          </button>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>记录收入</h1>
+        </div>
+
+        <div className="card">
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label className="input-label">金额 *</label>
+              <input
+                type="number"
+                className="input"
+                placeholder="0.00"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                step="0.01"
+                min="0.01"
+                required
+                style={{ fontSize: '24px', fontWeight: 'bold' }}
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">收入类型 *</label>
+              <select
+                className="select"
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                required
+              >
+                {INCOME_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">时间 *</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={formData.income_time.replace(' ', 'T').slice(0, 16)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const dateTime = value.replace('T', ' ') + ':00';
+                  setFormData({ ...formData, income_time: dateTime });
+                }}
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="error-message">
+                <span>⚠️</span>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-success btn-block"
+              disabled={loading}
+              style={{ marginTop: '8px', fontSize: '18px', padding: '16px' }}
+            >
+              {loading ? '保存中...' : '💾 保存收入'}
+            </button>
+          </form>
+        </div>
+
+        {/* 快速金额按钮 */}
+        <div className="card" style={{ marginTop: '16px' }}>
+          <div className="input-label" style={{ marginBottom: '12px' }}>快速输入</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {[100, 500, 1000, 2000, 5000, 10000].map((amount) => (
+              <button
+                key={amount}
+                type="button"
+                className="btn"
+                onClick={() => setFormData({ ...formData, amount: amount.toString() })}
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '2px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  padding: '12px'
+                }}
+              >
+                ¥{amount}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

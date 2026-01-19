@@ -1,0 +1,195 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { expenseApi, categoryApi } from '../services/api';
+import { getTodayDate } from '../utils/format';
+
+export default function AddExpense() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    amount: '',
+    category: '',
+    description: '',
+    expense_time: getTodayDate()
+  });
+  const [categories, setCategories] = useState<string[]>([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const response = await categoryApi.getList();
+      if (response.code === 200) {
+        setCategories(response.data);
+        if (response.data.length > 0) {
+          setFormData(prev => ({ ...prev, category: response.data[0] }));
+        }
+      }
+    } catch (err) {
+      console.error('加载类别失败', err);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+      setError('请输入有效的金额');
+      return;
+    }
+
+    if (!formData.category) {
+      setError('请选择类别');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await expenseApi.create({
+        amount: parseFloat(formData.amount),
+        category: formData.category,
+        description: formData.description || undefined,
+        expense_time: formData.expense_time
+      });
+
+      if (response.code === 200) {
+        navigate('/home');
+      } else {
+        setError(response.message || '创建失败');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || '创建失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="page">
+      <div className="container" style={{ maxWidth: '500px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', marginTop: '20px' }}>
+          <button
+            onClick={() => navigate('/home')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: 'white',
+              marginRight: '12px'
+            }}
+          >
+            ←
+          </button>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>记录支出</h1>
+        </div>
+
+        <div className="card">
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label className="input-label">金额 *</label>
+              <input
+                type="number"
+                className="input"
+                placeholder="0.00"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                step="0.01"
+                min="0.01"
+                required
+                style={{ fontSize: '24px', fontWeight: 'bold' }}
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">类别 *</label>
+              <select
+                className="select"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                required
+              >
+                {categories.length === 0 && <option value="">加载中...</option>}
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">时间 *</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={formData.expense_time.replace(' ', 'T').slice(0, 16)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const dateTime = value.replace('T', ' ') + ':00';
+                  setFormData({ ...formData, expense_time: dateTime });
+                }}
+                required
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">备注</label>
+              <textarea
+                className="textarea"
+                placeholder="添加备注信息（可选）"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            {error && (
+              <div className="error-message">
+                <span>⚠️</span>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={loading}
+              style={{ marginTop: '8px', fontSize: '18px', padding: '16px' }}
+            >
+              {loading ? '保存中...' : '💾 保存支出'}
+            </button>
+          </form>
+        </div>
+
+        {/* 快速金额按钮 */}
+        <div className="card" style={{ marginTop: '16px' }}>
+          <div className="input-label" style={{ marginBottom: '12px' }}>快速输入</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {[10, 20, 50, 100, 200, 500].map((amount) => (
+              <button
+                key={amount}
+                type="button"
+                className="btn"
+                onClick={() => setFormData({ ...formData, amount: amount.toString() })}
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '2px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                  padding: '12px'
+                }}
+              >
+                ¥{amount}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
