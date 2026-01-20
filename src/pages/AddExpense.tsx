@@ -14,22 +14,33 @@ export default function AddExpense() {
   const [categories, setCategories] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categoryError, setCategoryError] = useState('');
 
   useEffect(() => {
     loadCategories();
   }, []);
 
   const loadCategories = async () => {
+    setLoadingCategories(true);
+    setCategoryError('');
     try {
       const response = await categoryApi.getList();
-      if (response.code === 200) {
+      if (response.code === 200 && response.data) {
         setCategories(response.data);
         if (response.data.length > 0) {
           setFormData(prev => ({ ...prev, category: response.data[0] }));
+        } else {
+          setCategoryError('暂无可用类别');
         }
+      } else {
+        setCategoryError(response.message || '加载类别失败');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('加载类别失败', err);
+      setCategoryError(err.response?.data?.message || '加载类别失败，请稍后重试');
+    } finally {
+      setLoadingCategories(false);
     }
   };
 
@@ -108,19 +119,60 @@ export default function AddExpense() {
 
             <div className="input-group">
               <label className="input-label">类别 *</label>
-              <select
-                className="select"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                required
-              >
-                {categories.length === 0 && <option value="">加载中...</option>}
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+              {loadingCategories ? (
+                <div style={{ padding: '14px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                  正在加载类别...
+                </div>
+              ) : categoryError ? (
+                <div>
+                  <select
+                    className="select"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    required
+                    disabled
+                  >
+                    <option value="">加载失败</option>
+                  </select>
+                  <div className="error-message" style={{ marginTop: '8px' }}>
+                    <span>⚠️</span>
+                    <span>{categoryError}</span>
+                    <button
+                      type="button"
+                      onClick={loadCategories}
+                      style={{
+                        marginLeft: '12px',
+                        background: 'var(--primary-color)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      重试
+                    </button>
+                  </div>
+                </div>
+              ) : categories.length === 0 ? (
+                <div style={{ padding: '14px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                  暂无可用类别
+                </div>
+              ) : (
+                <select
+                  className="select"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  required
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="input-group">
