@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { incomeApi } from '../services/api';
-import { getTodayDate } from '../utils/format';
+import { getTodayDate, formatDateTimeForAPI, formatDateTimeForInput } from '../utils/format';
 
 const INCOME_TYPES = ['工资', '奖金', '投资收益', '兼职', '其他'];
 
@@ -108,11 +108,10 @@ export default function AddIncome() {
               <input
                 type="datetime-local"
                 className="input"
-                value={formData.income_time.replace(' ', 'T').slice(0, 16)}
+                value={formatDateTimeForInput(formData.income_time)}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  const dateTime = value.replace('T', ' ') + ':00';
-                  setFormData({ ...formData, income_time: dateTime });
+                  const apiFormat = formatDateTimeForAPI(e.target.value);
+                  setFormData({ ...formData, income_time: apiFormat });
                 }}
                 required
               />

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { expenseApi, categoryApi } from '../services/api';
-import { getTodayDate } from '../utils/format';
+import { getTodayDate, formatDateTimeForAPI, formatDateTimeForInput } from '../utils/format';
+import type { ExpenseCategory } from '../types';
 
 export default function AddExpense() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function AddExpense() {
     description: '',
     expense_time: getTodayDate()
   });
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -27,9 +28,11 @@ export default function AddExpense() {
     try {
       const response = await categoryApi.getList();
       if (response.code === 200 && response.data) {
+        // 接口已经按 sort 排序，直接使用
         setCategories(response.data);
         if (response.data.length > 0) {
-          setFormData(prev => ({ ...prev, category: response.data[0] }));
+          // 使用类别的 name 字段
+          setFormData(prev => ({ ...prev, category: response.data[0].name }));
         } else {
           setCategoryError('暂无可用类别');
         }
@@ -167,8 +170,8 @@ export default function AddExpense() {
                   required
                 >
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                 </select>
@@ -180,11 +183,10 @@ export default function AddExpense() {
               <input
                 type="datetime-local"
                 className="input"
-                value={formData.expense_time.replace(' ', 'T').slice(0, 16)}
+                value={formatDateTimeForInput(formData.expense_time)}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  const dateTime = value.replace('T', ' ') + ':00';
-                  setFormData({ ...formData, expense_time: dateTime });
+                  const apiFormat = formatDateTimeForAPI(e.target.value);
+                  setFormData({ ...formData, expense_time: apiFormat });
                 }}
                 required
               />

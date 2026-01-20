@@ -61,6 +61,14 @@ export interface Income {
   updated_at: string;
 }
 
+export interface ExpenseCategory {
+  id: number;
+  name: string;
+  sort: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CreateExpenseRequest {
   amount: number;
   category: string;

@@ -12,6 +12,7 @@ import type {
   UpdateIncomeRequest,
   Expense,
   Income,
+  ExpenseCategory,
   PageResponse,
   ApiResponse,
   User
@@ -123,7 +124,7 @@ export const incomeApi = {
 
 // 类别相关 API
 export const categoryApi = {
-  getList: (): Promise<ApiResponse<string[]>> =>
+  getList: (): Promise<ApiResponse<ExpenseCategory[]>> =>
     api.get('/categories')
 };
 
