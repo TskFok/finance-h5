@@ -403,6 +403,14 @@ export default function Home() {
           <div className="nav-item-icon">💰</div>
           <div>收入</div>
         </button>
+        <button
+          className="nav-item"
+          onClick={() => navigate('/stats')}
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <div className="nav-item-icon">📊</div>
+          <div>统计</div>
+        </button>
       </div>
 
       {/* 浮动按钮 */}

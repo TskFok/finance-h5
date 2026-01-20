@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import AddExpense from './pages/AddExpense';
 import AddIncome from './pages/AddIncome';
+import Stats from './pages/Stats';
 import { storage } from './utils/storage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,14 @@ function App() {
           element={
             <PrivateRoute>
               <AddIncome />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <PrivateRoute>
+              <Stats />
             </PrivateRoute>
           }
         />

@@ -13,6 +13,7 @@ import type {
   Expense,
   Income,
   ExpenseCategory,
+  ExpenseDetailedStatistics,
   PageResponse,
   ApiResponse,
   User
@@ -95,7 +96,17 @@ export const expenseApi = {
     start_time?: string;
     end_time?: string;
   }): Promise<ApiResponse> =>
-    api.get('/expenses/statistics', { params })
+    api.get('/expenses/statistics', { params }),
+
+  getDetailedStatistics: (params: {
+    range_type: 'month' | 'year' | 'custom';
+    year_month?: string;
+    year?: string;
+    start_time?: string;
+    end_time?: string;
+    categories?: string;
+  }): Promise<ApiResponse<ExpenseDetailedStatistics>> =>
+    api.get('/expenses/detailed-statistics', { params })
 };
 
 // 收入相关 API

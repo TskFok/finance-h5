@@ -69,6 +69,19 @@ export interface ExpenseCategory {
   updated_at: string;
 }
 
+export interface ExpenseCategoryStat {
+  category: string;
+  total: number;
+  count: number;
+  percentage: number;
+}
+
+export interface ExpenseDetailedStatistics {
+  total_amount: number;
+  total_count: number;
+  category_stats: ExpenseCategoryStat[];
+}
+
 export interface CreateExpenseRequest {
   amount: number;
   category: string;
