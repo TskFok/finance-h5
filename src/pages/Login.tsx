@@ -38,16 +38,16 @@ export default function Login() {
       <div className="container" style={{ maxWidth: '400px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px', marginTop: '60px' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>💰</div>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
             记账助手
           </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '16px' }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.125rem' }}>
             轻松管理您的每一笔收支
           </p>
         </div>
 
         <div className="card">
-          <h2 style={{ fontSize: '24px', marginBottom: '24px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.75rem', marginBottom: '24px', textAlign: 'center' }}>
             登录
           </h2>
 

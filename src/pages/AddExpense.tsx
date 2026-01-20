@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { expenseApi, categoryApi } from '../services/api';
 import { getTodayDate, formatDateTimeForAPI, formatDateTimeForInput } from '../utils/format';
+import { CategoryIcon } from '../utils/categoryIcons';
 import type { ExpenseCategory } from '../types';
 
 export default function AddExpense() {
@@ -84,23 +85,37 @@ export default function AddExpense() {
   };
 
   return (
-    <div className="page">
-      <div className="container" style={{ maxWidth: '500px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', marginTop: '20px' }}>
+    <div className="page" style={{ padding: '0', width: '100%' }}>
+      <div style={{ 
+        width: '100%', 
+        maxWidth: '100%',
+        padding: '20px 16px',
+        margin: '0 auto'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          marginBottom: '24px', 
+          marginTop: '10px',
+          padding: '0 4px'
+        }}>
           <button
             onClick={() => navigate('/home')}
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '24px',
+              fontSize: '2rem',
               cursor: 'pointer',
               color: 'white',
-              marginRight: '12px'
+              marginRight: '12px',
+              padding: '8px',
+              minWidth: '44px',
+              minHeight: '44px'
             }}
           >
             ←
           </button>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>记录支出</h1>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'white', flex: 1 }}>记录支出</h1>
         </div>
 
         <div className="card">
@@ -116,7 +131,7 @@ export default function AddExpense() {
                 step="0.01"
                 min="0.01"
                 required
-                style={{ fontSize: '24px', fontWeight: 'bold' }}
+                style={{ fontSize: '2rem', fontWeight: 'bold' }}
               />
             </div>
 
@@ -159,22 +174,39 @@ export default function AddExpense() {
                   </div>
                 </div>
               ) : categories.length === 0 ? (
-                <div style={{ padding: '14px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                <div style={{ padding: '16px 18px', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '1rem' }}>
                   暂无可用类别
                 </div>
               ) : (
-                <select
-                  className="select"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  required
-                >
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                <div style={{ position: 'relative' }}>
+                  <select
+                    className="select"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    required
+                    style={{ paddingLeft: '60px' }}
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  {formData.category && (
+                    <div 
+                      className="category-icon" 
+                      style={{ 
+                        position: 'absolute', 
+                        left: '12px', 
+                        top: '50%', 
+                        transform: 'translateY(-50%)',
+                        pointerEvents: 'none'
+                      }}
+                    >
+                      <CategoryIcon categoryName={formData.category} size={24} />
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -214,7 +246,7 @@ export default function AddExpense() {
               type="submit"
               className="btn btn-primary btn-block"
               disabled={loading}
-              style={{ marginTop: '8px', fontSize: '18px', padding: '16px' }}
+              style={{ marginTop: '8px' }}
             >
               {loading ? '保存中...' : '💾 保存支出'}
             </button>
@@ -222,9 +254,9 @@ export default function AddExpense() {
         </div>
 
         {/* 快速金额按钮 */}
-        <div className="card" style={{ marginTop: '16px' }}>
+        <div className="card" style={{ marginTop: '16px', width: '100%' }}>
           <div className="input-label" style={{ marginBottom: '12px' }}>快速输入</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', width: '100%' }}>
             {[10, 20, 50, 100, 200, 500].map((amount) => (
               <button
                 key={amount}
@@ -235,7 +267,9 @@ export default function AddExpense() {
                   background: 'var(--card-bg)',
                   border: '2px solid var(--border-color)',
                   color: 'var(--text-primary)',
-                  padding: '12px'
+                  padding: '16px 12px',
+                  fontSize: '1.125rem',
+                  width: '100%'
                 }}
               >
                 ¥{amount}

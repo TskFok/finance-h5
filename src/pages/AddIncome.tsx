@@ -51,23 +51,37 @@ export default function AddIncome() {
   };
 
   return (
-    <div className="page">
-      <div className="container" style={{ maxWidth: '500px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', marginTop: '20px' }}>
+    <div className="page" style={{ padding: '0', width: '100%' }}>
+      <div style={{ 
+        width: '100%', 
+        maxWidth: '100%',
+        padding: '20px 16px',
+        margin: '0 auto'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          marginBottom: '24px', 
+          marginTop: '10px',
+          padding: '0 4px'
+        }}>
           <button
             onClick={() => navigate('/home')}
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '24px',
+              fontSize: '2rem',
               cursor: 'pointer',
               color: 'white',
-              marginRight: '12px'
+              marginRight: '12px',
+              padding: '8px',
+              minWidth: '44px',
+              minHeight: '44px'
             }}
           >
             ←
           </button>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>记录收入</h1>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'white', flex: 1 }}>记录收入</h1>
         </div>
 
         <div className="card">
@@ -83,7 +97,7 @@ export default function AddIncome() {
                 step="0.01"
                 min="0.01"
                 required
-                style={{ fontSize: '24px', fontWeight: 'bold' }}
+                style={{ fontSize: '2rem', fontWeight: 'bold' }}
               />
             </div>
 
@@ -128,7 +142,7 @@ export default function AddIncome() {
               type="submit"
               className="btn btn-success btn-block"
               disabled={loading}
-              style={{ marginTop: '8px', fontSize: '18px', padding: '16px' }}
+              style={{ marginTop: '8px' }}
             >
               {loading ? '保存中...' : '💾 保存收入'}
             </button>
@@ -136,9 +150,9 @@ export default function AddIncome() {
         </div>
 
         {/* 快速金额按钮 */}
-        <div className="card" style={{ marginTop: '16px' }}>
+        <div className="card" style={{ marginTop: '16px', width: '100%' }}>
           <div className="input-label" style={{ marginBottom: '12px' }}>快速输入</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', width: '100%' }}>
             {[100, 500, 1000, 2000, 5000, 10000].map((amount) => (
               <button
                 key={amount}
@@ -149,7 +163,9 @@ export default function AddIncome() {
                   background: 'var(--card-bg)',
                   border: '2px solid var(--border-color)',
                   color: 'var(--text-primary)',
-                  padding: '12px'
+                  padding: '16px 12px',
+                  fontSize: '1.125rem',
+                  width: '100%'
                 }}
               >
                 ¥{amount}

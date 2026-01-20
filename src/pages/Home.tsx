@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { expenseApi, incomeApi, authApi } from '../services/api';
 import { storage } from '../utils/storage';
 import { formatDateTime, formatMoney } from '../utils/format';
+import { CategoryIcon } from '../utils/categoryIcons';
 import type { Expense, Income } from '../types';
 
 export default function Home() {
@@ -71,8 +72,8 @@ export default function Home() {
       <div className="card" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '4px' }}>欢迎回来</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{user?.username || '用户'}</div>
+            <div style={{ fontSize: '1rem', opacity: 0.9, marginBottom: '6px' }}>欢迎回来</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{user?.username || '用户'}</div>
           </div>
           <button
             onClick={handleLogout}
@@ -80,10 +81,10 @@ export default function Home() {
               background: 'rgba(255, 255, 255, 0.2)',
               border: 'none',
               color: 'white',
-              padding: '8px 16px',
+              padding: '10px 18px',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '1rem'
             }}
           >
             退出
@@ -91,16 +92,16 @@ export default function Home() {
         </div>
         <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '4px' }}>总支出</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{formatMoney(totalExpense)}</div>
+            <div style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '8px' }}>总支出</div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{formatMoney(totalExpense)}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '4px' }}>总收入</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{formatMoney(totalIncome)}</div>
+            <div style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '8px' }}>总收入</div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{formatMoney(totalIncome)}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '4px' }}>净收入</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+            <div style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '8px' }}>净收入</div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
               {formatMoney(totalIncome - totalExpense)}
             </div>
           </div>
@@ -159,35 +160,43 @@ export default function Home() {
       ) : (
         <>
           <div className="card" style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '12px' }}>
               {activeTab === 'expense' ? '支出' : '收入'}总计
             </div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--income-color)' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--income-color)' }}>
               {formatMoney(total)}
             </div>
           </div>
 
           {currentList.map((item) => (
-            <div key={item.id} className="list-item">
-              <div className="list-item-header">
-                <div className="list-item-title">
-                  {activeTab === 'expense' 
-                    ? (item as Expense).category 
-                    : (item as Income).type}
-                </div>
-                <div className={`amount-badge ${activeTab === 'expense' ? 'amount-expense' : 'amount-income'}`}>
-                  {activeTab === 'expense' ? '-' : '+'}{formatMoney(item.amount)}
-                </div>
+            <div key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <div className="list-item-icon">
+                <CategoryIcon 
+                  categoryName={activeTab === 'expense' ? (item as Expense).category : (item as Income).type} 
+                  size={28}
+                />
               </div>
-              <div className="list-item-meta">
-                <div>
-                  {activeTab === 'expense' && (item as Expense).description && (
-                    <div style={{ marginTop: '4px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                      {(item as Expense).description}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="list-item-header">
+                  <div className="list-item-title">
+                    {activeTab === 'expense' 
+                      ? (item as Expense).category 
+                      : (item as Income).type}
+                  </div>
+                  <div className={`amount-badge ${activeTab === 'expense' ? 'amount-expense' : 'amount-income'}`}>
+                    {activeTab === 'expense' ? '-' : '+'}{formatMoney(item.amount)}
+                  </div>
+                </div>
+                <div className="list-item-meta">
+                  <div>
+                    {activeTab === 'expense' && (item as Expense).description && (
+                      <div style={{ marginTop: '4px', fontSize: '0.9375rem', color: 'var(--text-secondary)' }}>
+                        {(item as Expense).description}
+                      </div>
+                    )}
+                    <div style={{ marginTop: '4px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                      {formatDateTime(activeTab === 'expense' ? (item as Expense).expense_time : (item as Income).income_time)}
                     </div>
-                  )}
-                  <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {formatDateTime(activeTab === 'expense' ? (item as Expense).expense_time : (item as Income).income_time)}
                   </div>
                 </div>
               </div>
