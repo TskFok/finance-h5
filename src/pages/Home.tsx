@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { expenseApi, incomeApi, authApi } from '../services/api';
 import { storage } from '../utils/storage';
-import { formatDateTime, formatMoney } from '../utils/format';
+import { formatDateTime, formatMoney, formatDate } from '../utils/format';
 import { CategoryIcon } from '../utils/categoryIcons';
 import type { Expense, Income } from '../types';
 
@@ -15,11 +15,14 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [totalExpense, setTotalExpense] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+  const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
     loadUser();
     loadData();
-  }, [activeTab]);
+  }, [activeTab, startTime, endTime]);
 
   const loadUser = async () => {
     try {
@@ -36,15 +39,23 @@ export default function Home() {
   const loadData = async () => {
     setLoading(true);
     try {
+      const params: any = { page: 1, page_size: 100 };
+      if (startTime) {
+        params.start_time = startTime;
+      }
+      if (endTime) {
+        params.end_time = endTime;
+      }
+
       if (activeTab === 'expense') {
-        const response = await expenseApi.getList({ page: 1, page_size: 20 });
+        const response = await expenseApi.getList(params);
         if (response.code === 200) {
           setExpenses(response.data.list);
           const total = response.data.list.reduce((sum, item) => sum + item.amount, 0);
           setTotalExpense(total);
         }
       } else {
-        const response = await incomeApi.getList({ page: 1, page_size: 20 });
+        const response = await incomeApi.getList(params);
         if (response.code === 200) {
           setIncomes(response.data.list);
           const total = response.data.list.reduce((sum, item) => sum + item.amount, 0);
@@ -56,6 +67,41 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 快捷时间选择
+  const setQuickFilter = (type: 'today' | 'week' | 'month' | 'all') => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    switch (type) {
+      case 'today':
+        setStartTime(formatDate(today.toISOString()));
+        setEndTime(formatDate(today.toISOString()));
+        break;
+      case 'week':
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        setStartTime(formatDate(weekStart.toISOString()));
+        setEndTime(formatDate(now.toISOString()));
+        break;
+      case 'month':
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        setStartTime(formatDate(monthStart.toISOString()));
+        setEndTime(formatDate(now.toISOString()));
+        break;
+      case 'all':
+        setStartTime('');
+        setEndTime('');
+        break;
+    }
+    setShowFilter(false);
+  };
+
+  const clearFilter = () => {
+    setStartTime('');
+    setEndTime('');
+    setShowFilter(false);
   };
 
   const handleLogout = () => {
@@ -138,6 +184,140 @@ export default function Home() {
         >
           💰 收入
         </button>
+      </div>
+
+      {/* 时间筛选 */}
+      <div className="card" style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showFilter ? '16px' : '0' }}>
+          <div style={{ fontSize: '1.125rem', fontWeight: '600' }}>时间筛选</div>
+          <button
+            onClick={() => setShowFilter(!showFilter)}
+            style={{
+              background: 'var(--primary-color)',
+              color: 'white',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            {showFilter ? '收起' : '筛选'}
+          </button>
+        </div>
+
+        {showFilter && (
+          <div>
+            {/* 快捷选项 */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setQuickFilter('today')}
+                className="btn"
+                style={{
+                  background: startTime && endTime && startTime === endTime && startTime === formatDate(new Date().toISOString())
+                    ? 'var(--primary-color)' : 'var(--card-bg)',
+                  color: startTime && endTime && startTime === endTime && startTime === formatDate(new Date().toISOString())
+                    ? 'white' : 'var(--text-primary)',
+                  border: '2px solid var(--border-color)',
+                  padding: '10px 16px',
+                  fontSize: '1rem'
+                }}
+              >
+                今天
+              </button>
+              <button
+                onClick={() => setQuickFilter('week')}
+                className="btn"
+                style={{
+                  background: 'var(--card-bg)',
+                  color: 'var(--text-primary)',
+                  border: '2px solid var(--border-color)',
+                  padding: '10px 16px',
+                  fontSize: '1rem'
+                }}
+              >
+                本周
+              </button>
+              <button
+                onClick={() => setQuickFilter('month')}
+                className="btn"
+                style={{
+                  background: 'var(--card-bg)',
+                  color: 'var(--text-primary)',
+                  border: '2px solid var(--border-color)',
+                  padding: '10px 16px',
+                  fontSize: '1rem'
+                }}
+              >
+                本月
+              </button>
+              <button
+                onClick={() => setQuickFilter('all')}
+                className="btn"
+                style={{
+                  background: !startTime && !endTime ? 'var(--primary-color)' : 'var(--card-bg)',
+                  color: !startTime && !endTime ? 'white' : 'var(--text-primary)',
+                  border: '2px solid var(--border-color)',
+                  padding: '10px 16px',
+                  fontSize: '1rem'
+                }}
+              >
+                全部
+              </button>
+            </div>
+
+            {/* 自定义时间范围 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="input-group" style={{ marginBottom: '0' }}>
+                <label className="input-label">开始时间</label>
+                <input
+                  type="date"
+                  className="input"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  style={{ fontSize: '1.125rem' }}
+                />
+              </div>
+              <div className="input-group" style={{ marginBottom: '0' }}>
+                <label className="input-label">结束时间</label>
+                <input
+                  type="date"
+                  className="input"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  style={{ fontSize: '1.125rem' }}
+                />
+              </div>
+              {(startTime || endTime) && (
+                <button
+                  onClick={clearFilter}
+                  className="btn"
+                  style={{
+                    background: 'var(--card-bg)',
+                    color: 'var(--text-primary)',
+                    border: '2px solid var(--border-color)',
+                    marginTop: '8px'
+                  }}
+                >
+                  清除筛选
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 显示当前筛选条件 */}
+        {(startTime || endTime) && !showFilter && (
+          <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '8px', fontSize: '0.9375rem' }}>
+            {startTime && endTime ? (
+              <span>筛选范围: {startTime} 至 {endTime}</span>
+            ) : startTime ? (
+              <span>从 {startTime} 开始</span>
+            ) : (
+              <span>至 {endTime} 结束</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 列表 */}
