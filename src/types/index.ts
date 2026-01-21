@@ -82,6 +82,11 @@ export interface ExpenseDetailedStatistics {
   category_stats: ExpenseCategoryStat[];
 }
 
+export interface IncomeExpenseSummary {
+  total_expense: number;
+  total_income: number;
+}
+
 export interface CreateExpenseRequest {
   amount: number;
   category: string;

@@ -14,6 +14,7 @@ import type {
   Income,
   ExpenseCategory,
   ExpenseDetailedStatistics,
+  IncomeExpenseSummary,
   PageResponse,
   ApiResponse,
   User
@@ -137,6 +138,12 @@ export const incomeApi = {
 export const categoryApi = {
   getList: (): Promise<ApiResponse<ExpenseCategory[]>> =>
     api.get('/categories')
+};
+
+// 统计相关 API
+export const statisticsApi = {
+  getSummary: (params?: { start_time?: string; end_time?: string }): Promise<ApiResponse<IncomeExpenseSummary>> =>
+    api.get('/statistics/summary', { params })
 };
 
 export default api;

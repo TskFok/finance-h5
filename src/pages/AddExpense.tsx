@@ -73,7 +73,7 @@ export default function AddExpense() {
       });
 
       if (response.code === 200) {
-        navigate('/home');
+        navigate('/home', { replace: true, state: { refreshAt: Date.now() } });
       } else {
         setError(response.message || '创建失败');
       }

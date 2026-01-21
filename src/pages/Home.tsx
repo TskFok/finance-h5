@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { expenseApi, incomeApi, authApi } from '../services/api';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { expenseApi, incomeApi, authApi, statisticsApi } from '../services/api';
 import { storage } from '../utils/storage';
 import { formatDateTime, formatMoney, formatDate } from '../utils/format';
 import { CategoryIcon } from '../utils/categoryIcons';
@@ -8,6 +8,7 @@ import type { Expense, Income } from '../types';
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'expense' | 'income'>('expense');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -15,14 +16,23 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [totalExpense, setTotalExpense] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
-  const [startTime, setStartTime] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
+  const [startTime, setStartTime] = useState<string>(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    return formatDate(monthStart.toISOString());
+  });
+  const [endTime, setEndTime] = useState<string>(() => formatDate(new Date().toISOString()));
   const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
     loadUser();
+  }, []);
+
+  useEffect(() => {
     loadData();
-  }, [activeTab, startTime, endTime]);
+    loadSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, startTime, endTime, location.key]);
 
   const loadUser = async () => {
     try {
@@ -51,21 +61,32 @@ export default function Home() {
         const response = await expenseApi.getList(params);
         if (response.code === 200) {
           setExpenses(response.data.list);
-          const total = response.data.list.reduce((sum, item) => sum + item.amount, 0);
-          setTotalExpense(total);
         }
       } else {
         const response = await incomeApi.getList(params);
         if (response.code === 200) {
           setIncomes(response.data.list);
-          const total = response.data.list.reduce((sum, item) => sum + item.amount, 0);
-          setTotalIncome(total);
         }
       }
     } catch (err) {
       console.error('加载数据失败', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSummary = async () => {
+    try {
+      const params: any = {};
+      if (startTime) params.start_time = startTime;
+      if (endTime) params.end_time = endTime;
+      const res = await statisticsApi.getSummary(Object.keys(params).length ? params : undefined);
+      if (res.code === 200 && res.data) {
+        setTotalExpense(Number(res.data.total_expense || 0));
+        setTotalIncome(Number(res.data.total_income || 0));
+      }
+    } catch (err) {
+      console.error('加载汇总失败', err);
     }
   };
 
