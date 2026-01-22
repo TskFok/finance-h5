@@ -5,6 +5,7 @@ import { storage } from '../utils/storage';
 import { formatDateTime, formatMoney, formatDate } from '../utils/format';
 import { CategoryIcon } from '../utils/categoryIcons';
 import type { Expense, Income } from '../types';
+import BottomNav from '../components/BottomNav';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ export default function Home() {
   });
   const [endTime, setEndTime] = useState<string>(() => formatDate(new Date().toISOString()));
   const [showFilter, setShowFilter] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: number; type: 'expense' | 'income' } | null>(null);
 
   useEffect(() => {
     loadUser();
@@ -123,6 +127,49 @@ export default function Home() {
     setStartTime('');
     setEndTime('');
     setShowFilter(false);
+  };
+
+  const handleDeleteClick = (id: number) => {
+    setItemToDelete({ id, type: activeTab });
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    
+    setDeletingId(itemToDelete.id);
+    try {
+      if (itemToDelete.type === 'expense') {
+        const response = await expenseApi.delete(itemToDelete.id);
+        if (response.code === 200) {
+          // 刷新列表和统计数据
+          await loadData();
+          await loadSummary();
+        } else {
+          alert(response.message || '删除失败');
+        }
+      } else {
+        const response = await incomeApi.delete(itemToDelete.id);
+        if (response.code === 200) {
+          // 刷新列表和统计数据
+          await loadData();
+          await loadSummary();
+        } else {
+          alert(response.message || '删除失败');
+        }
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || '删除失败，请稍后重试');
+    } finally {
+      setDeletingId(null);
+      setShowDeleteConfirm(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setItemToDelete(null);
   };
 
   const handleLogout = () => {
@@ -370,7 +417,7 @@ export default function Home() {
           </div>
 
           {currentList.map((item) => (
-            <div key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <div key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
               <div className="list-item-icon">
                 <CategoryIcon 
                   categoryName={activeTab === 'expense' ? (item as Expense).category : (item as Income).type} 
@@ -384,8 +431,31 @@ export default function Home() {
                       ? (item as Expense).category 
                       : (item as Income).type}
                   </div>
-                  <div className={`amount-badge ${activeTab === 'expense' ? 'amount-expense' : 'amount-income'}`}>
-                    {activeTab === 'expense' ? '-' : '+'}{formatMoney(item.amount)}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className={`amount-badge ${activeTab === 'expense' ? 'amount-expense' : 'amount-income'}`}>
+                      {activeTab === 'expense' ? '-' : '+'}{formatMoney(item.amount)}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteClick(item.id)}
+                      disabled={deletingId === item.id}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--danger-color)',
+                        cursor: deletingId === item.id ? 'not-allowed' : 'pointer',
+                        padding: '4px 8px',
+                        fontSize: '1.25rem',
+                        opacity: deletingId === item.id ? 0.5 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '32px',
+                        minHeight: '32px'
+                      }}
+                      title="删除"
+                    >
+                      {deletingId === item.id ? '⏳' : '🗑️'}
+                    </button>
                   </div>
                 </div>
                 <div className="list-item-meta">
@@ -406,33 +476,7 @@ export default function Home() {
         </>
       )}
 
-      {/* 底部导航 */}
-      <div className="bottom-nav">
-        <button
-          className={`nav-item ${activeTab === 'expense' ? 'active' : ''}`}
-          onClick={() => setActiveTab('expense')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div className="nav-item-icon">💸</div>
-          <div>支出</div>
-        </button>
-        <button
-          className={`nav-item ${activeTab === 'income' ? 'active' : ''}`}
-          onClick={() => setActiveTab('income')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div className="nav-item-icon">💰</div>
-          <div>收入</div>
-        </button>
-        <button
-          className="nav-item"
-          onClick={() => navigate('/stats')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div className="nav-item-icon">📊</div>
-          <div>统计</div>
-        </button>
-      </div>
+      <BottomNav active="home" />
 
       {/* 浮动按钮 */}
       <button
@@ -442,6 +486,55 @@ export default function Home() {
       >
         +
       </button>
+
+      {/* 删除确认对话框 */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '16px' }}>
+              确认删除
+            </div>
+            <div style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+              确定要删除这条{activeTab === 'expense' ? '支出' : '收入'}记录吗？删除后无法恢复。
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handleDeleteCancel}
+                className="btn"
+                style={{
+                  flex: 1,
+                  background: 'var(--card-bg)',
+                  color: 'var(--text-primary)',
+                  border: '2px solid var(--border-color)'
+                }}
+                disabled={deletingId !== null}
+              >
+                取消
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="btn btn-danger"
+                style={{ flex: 1 }}
+                disabled={deletingId !== null}
+              >
+                {deletingId !== null ? '删除中...' : '确认删除'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

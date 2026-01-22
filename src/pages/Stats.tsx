@@ -5,6 +5,7 @@ import { categoryApi, expenseApi } from '../services/api';
 import type { ExpenseCategory, ExpenseDetailedStatistics } from '../types';
 import { CategoryIcon } from '../utils/categoryIcons';
 import { formatMoney } from '../utils/format';
+import BottomNav from '../components/BottomNav';
 
 type RangeType = 'month' | 'year' | 'custom';
 
@@ -432,25 +433,7 @@ export default function Stats() {
         </div>
       </div>
 
-      {/* 底部导航（与首页保持一致，避免进入统计后底栏消失） */}
-      <div className="bottom-nav">
-        <button
-          className="nav-item"
-          onClick={() => navigate('/home')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div className="nav-item-icon">💸</div>
-          <div>明细</div>
-        </button>
-        <button
-          className="nav-item active"
-          onClick={() => navigate('/stats')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          <div className="nav-item-icon">📊</div>
-          <div>统计</div>
-        </button>
-      </div>
+      <BottomNav active="stats" />
     </div>
   );
 }

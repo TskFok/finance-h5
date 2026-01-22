@@ -15,10 +15,16 @@ import type {
   ExpenseCategory,
   ExpenseDetailedStatistics,
   IncomeExpenseSummary,
+  AIModel,
+  AIChatRequest,
+  AnalysisRequest,
+  AIChatHistoryItem,
+  AIAnalysisHistoryItem,
   PageResponse,
   ApiResponse,
   User
 } from '../types';
+import { postSSE, type SSEAbort } from '../utils/sse';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL+'/api/v1',
@@ -144,6 +150,29 @@ export const categoryApi = {
 export const statisticsApi = {
   getSummary: (params?: { start_time?: string; end_time?: string }): Promise<ApiResponse<IncomeExpenseSummary>> =>
     api.get('/statistics/summary', { params })
+};
+
+// AI 相关 API
+export const aiApi = {
+  getModels: (): Promise<ApiResponse<AIModel[]>> => api.get('/ai-models'),
+
+  streamChat: (data: AIChatRequest, handlers: { onDelta: (t: string) => void; onDone?: () => void; onError?: (m: string) => void }): SSEAbort =>
+    postSSE('/ai-chat', data, handlers),
+
+  getChatHistory: (params: { model_id: number; page?: number; page_size?: number }): Promise<ApiResponse<PageResponse<AIChatHistoryItem>>> =>
+    api.get('/ai-chat/history', { params }),
+
+  deleteChatHistory: (id: number): Promise<ApiResponse> => api.delete(`/ai-chat/history/${id}`),
+
+  streamAnalysis: (
+    data: AnalysisRequest,
+    handlers: { onDelta: (t: string) => void; onDone?: () => void; onError?: (m: string) => void }
+  ): SSEAbort => postSSE('/ai-analysis', data, handlers),
+
+  getAnalysisHistory: (params: { model_id: number; page?: number; page_size?: number }): Promise<ApiResponse<PageResponse<AIAnalysisHistoryItem>>> =>
+    api.get('/ai-analysis/history', { params }),
+
+  deleteAnalysisHistory: (id: number): Promise<ApiResponse> => api.delete(`/ai-analysis/history/${id}`)
 };
 
 export default api;

@@ -87,6 +87,49 @@ export interface IncomeExpenseSummary {
   total_income: number;
 }
 
+export interface AIModel {
+  id: number;
+  name: string;
+  base_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AIChatRequest {
+  model_id: number;
+  message: string;
+}
+
+export interface AnalysisRequest {
+  model_id: number;
+  start_time: string; // YYYY-MM-DD
+  end_time: string; // YYYY-MM-DD
+}
+
+// 历史记录字段后端文档未给出详细 schema，这里做宽松定义（便于展示与删除）
+export interface AIChatHistoryItem {
+  id: number;
+  model_id: number;
+  created_at?: string;
+  updated_at?: string;
+  message?: string;
+  content?: string;
+  answer?: string;
+  [k: string]: any;
+}
+
+export interface AIAnalysisHistoryItem {
+  id: number;
+  model_id: number;
+  created_at?: string;
+  updated_at?: string;
+  start_time?: string;
+  end_time?: string;
+  content?: string;
+  result?: string;
+  [k: string]: any;
+}
+
 export interface CreateExpenseRequest {
   amount: number;
   category: string;
