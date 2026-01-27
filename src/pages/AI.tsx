@@ -21,8 +21,18 @@ function prettyJson(obj: any) {
   }
 }
 
-function extractPreview(item: any): string {
+function extractPreview(item: any, kind?: 'chat' | 'analysis'): string {
+  // 聊天历史优先使用 ai_text
+  if (kind === 'chat' && item?.ai_text) {
+    return item.ai_text;
+  }
+  // 分析历史优先使用 content 或 result
+  if (kind === 'analysis') {
+    return item?.content || item?.result || item?.answer || prettyJson(item);
+  }
+  // 通用回退
   return (
+    item?.ai_text ||
     item?.content ||
     item?.answer ||
     item?.message ||
@@ -211,13 +221,31 @@ export default function AI() {
   const renderHistoryItem = (kind: 'chat' | 'analysis', item: any) => {
     const key = `${kind}-${item?.id}`;
     const expanded = expandedKey === key;
-    const preview = extractPreview(item);
+    const preview = extractPreview(item, kind);
     const created = item?.created_at || item?.createdAt || '';
+    
+    // 格式化日期时间
+    const formatCreatedAt = (dateStr?: string) => {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleString('zh-CN', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
+      } catch {
+        return dateStr;
+      }
+    };
+
     return (
       <div key={key} className="list-item" style={{ width: '100%' }}>
         <div className="list-item-header">
           <div className="list-item-title" style={{ fontSize: '1.25rem' }}>
-            #{item?.id} {created ? `· ${created}` : ''}
+            #{item?.id} {created ? `· ${formatCreatedAt(created)}` : ''}
           </div>
           <button
             onClick={() => deleteHistory(kind, item.id)}
@@ -234,40 +262,64 @@ export default function AI() {
             删除
           </button>
         </div>
-        <div style={{ color: 'var(--text-secondary)', marginTop: 6, fontSize: '1.1rem', whiteSpace: 'pre-wrap' }}>
-          {expanded ? preview : `${preview}`.slice(0, 120)}
-          {!expanded && preview.length > 120 ? '…' : ''}
+        
+        {/* 聊天历史：显示用户问题和AI回答 */}
+        {kind === 'chat' && item?.user_text && (
+          <div style={{ marginTop: 12, marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, marginBottom: 6, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+              💬 你的问题：
+            </div>
+            <div style={{ 
+              padding: 12, 
+              borderRadius: 12, 
+              background: 'rgba(74, 144, 226, 0.1)', 
+              fontSize: '1.1rem',
+              whiteSpace: 'pre-wrap',
+              lineHeight: 1.5
+            }}>
+              {item.user_text}
+            </div>
+          </div>
+        )}
+        
+        {/* AI回答内容 */}
+        <div style={{ marginTop: kind === 'chat' ? 0 : 6 }}>
+          {kind === 'chat' && (
+            <div style={{ fontWeight: 700, marginBottom: 6, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+              🤖 AI回答：
+            </div>
+          )}
+          <div style={{ 
+            color: 'var(--text-secondary)', 
+            fontSize: '1.1rem', 
+            whiteSpace: 'pre-wrap',
+            lineHeight: 1.5,
+            padding: kind === 'chat' ? 12 : 0,
+            borderRadius: kind === 'chat' ? 12 : 0,
+            background: kind === 'chat' ? 'rgba(47, 191, 113, 0.1)' : 'transparent'
+          }}>
+            {expanded ? preview : `${preview}`.slice(0, 200)}
+            {!expanded && preview.length > 200 ? '…' : ''}
+          </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-          <button
-            onClick={() => setExpandedKey(expanded ? null : key)}
-            style={{
-              background: 'transparent',
-              border: '2px solid var(--border-color)',
-              borderRadius: 12,
-              padding: '10px 14px',
-              cursor: 'pointer',
-              color: 'var(--text-primary)',
-              fontWeight: 700
-            }}
-          >
-            {expanded ? '收起' : '展开'}
-          </button>
-        </div>
-        {expanded && (
-          <pre
-            style={{
-              marginTop: 12,
-              padding: 12,
-              borderRadius: 12,
-              background: '#0b1220',
-              color: '#e6edf3',
-              overflow: 'auto',
-              fontSize: '0.95rem'
-            }}
-          >
-            {prettyJson(item)}
-          </pre>
+        
+        {preview.length > 200 && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+            <button
+              onClick={() => setExpandedKey(expanded ? null : key)}
+              style={{
+                background: 'transparent',
+                border: '2px solid var(--border-color)',
+                borderRadius: 12,
+                padding: '10px 14px',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                fontWeight: 700
+              }}
+            >
+              {expanded ? '收起' : '展开'}
+            </button>
+          </div>
         )}
       </div>
     );

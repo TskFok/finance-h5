@@ -109,12 +109,11 @@ export interface AnalysisRequest {
 // 历史记录字段后端文档未给出详细 schema，这里做宽松定义（便于展示与删除）
 export interface AIChatHistoryItem {
   id: number;
-  model_id: number;
+  ai_model_id: number;
+  user_id: number;
+  user_text: string;
+  ai_text: string;
   created_at?: string;
-  updated_at?: string;
-  message?: string;
-  content?: string;
-  answer?: string;
   [k: string]: any;
 }
 
