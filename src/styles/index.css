@@ -457,7 +457,7 @@ body {
   margin-bottom: 8px;
 }
 .home-summary-amount {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -543,7 +543,7 @@ body {
     margin-bottom: 2px;
   }
   .home-summary-amount {
-    font-size: 0.6875rem;
+    font-size: 0.7rem;
     font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
