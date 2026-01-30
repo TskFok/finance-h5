@@ -183,7 +183,7 @@ export default function Home() {
   return (
     <div className="page">
       {/* 头部 */}
-      <div className="card" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', marginBottom: '20px' }}>
+      <div className="card home-header-card" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
             <div style={{ fontSize: '1rem', opacity: 0.9, marginBottom: '6px' }}>欢迎回来</div>
@@ -204,20 +204,18 @@ export default function Home() {
             退出
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '8px' }}>总支出</div>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{formatMoney(totalExpense)}</div>
+        <div className="home-summary-row">
+          <div className="home-summary-col">
+            <div className="home-summary-label">总支出</div>
+            <div className="home-summary-amount">{formatMoney(totalExpense)}</div>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '8px' }}>总收入</div>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{formatMoney(totalIncome)}</div>
+          <div className="home-summary-col">
+            <div className="home-summary-label">总收入</div>
+            <div className="home-summary-amount">{formatMoney(totalIncome)}</div>
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '8px' }}>净收入</div>
-            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-              {formatMoney(totalIncome - totalExpense)}
-            </div>
+          <div className="home-summary-col">
+            <div className="home-summary-label">净收入</div>
+            <div className="home-summary-amount">{formatMoney(totalIncome - totalExpense)}</div>
           </div>
         </div>
       </div>
@@ -411,7 +409,7 @@ export default function Home() {
             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '12px' }}>
               {activeTab === 'expense' ? '支出' : '收入'}总计
             </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--income-color)' }}>
+            <div className="home-list-total-amount" style={{ fontWeight: 'bold', color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--income-color)' }}>
               {formatMoney(total)}
             </div>
           </div>
