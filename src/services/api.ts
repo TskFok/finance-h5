@@ -13,6 +13,7 @@ import type {
   Expense,
   Income,
   ExpenseCategory,
+  IncomeCategory,
   ExpenseDetailedStatistics,
   IncomeExpenseSummary,
   AIModel,
@@ -144,6 +145,12 @@ export const incomeApi = {
 export const categoryApi = {
   getList: (): Promise<ApiResponse<ExpenseCategory[]>> =>
     api.get('/categories')
+};
+
+// 收入类型 API
+export const incomeCategoryApi = {
+  getList: (): Promise<ApiResponse<IncomeCategory[]>> =>
+    api.get('/income-categories')
 };
 
 // 统计相关 API

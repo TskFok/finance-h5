@@ -1,19 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { incomeApi } from '../services/api';
+import { incomeApi, incomeCategoryApi } from '../services/api';
 import { getTodayDate, formatDateTimeForAPI, formatDateTimeForInput } from '../utils/format';
-
-const INCOME_TYPES = ['工资', '奖金', '投资收益', '兼职', '其他'];
+import type { IncomeCategory } from '../types';
 
 export default function AddIncome() {
   const navigate = useNavigate();
+  const [incomeCategories, setIncomeCategories] = useState<IncomeCategory[]>([]);
   const [formData, setFormData] = useState({
     amount: '',
-    type: INCOME_TYPES[0],
+    type: '',
     income_time: getTodayDate()
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categoryError, setCategoryError] = useState('');
+
+  useEffect(() => {
+    loadIncomeCategories();
+  }, []);
+
+  const loadIncomeCategories = async () => {
+    setLoadingCategories(true);
+    setCategoryError('');
+    try {
+      const response = await incomeCategoryApi.getList();
+      if (response.code === 200 && response.data) {
+        setIncomeCategories(response.data);
+        if (response.data.length > 0) {
+          setFormData(prev => ({ ...prev, type: response.data[0].name }));
+        } else {
+          setCategoryError('暂无可用收入类型');
+        }
+      } else {
+        setCategoryError(response.message || '加载收入类型失败');
+      }
+    } catch (err: any) {
+      console.error('加载收入类型失败', err);
+      setCategoryError(err.response?.data?.message || '加载收入类型失败，请稍后重试');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,18 +132,54 @@ export default function AddIncome() {
 
             <div className="input-group">
               <label className="input-label">收入类型 *</label>
-              <select
-                className="select"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                required
-              >
-                {INCOME_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+              {loadingCategories ? (
+                <div style={{ padding: '14px 16px', color: 'var(--text-secondary)', textAlign: 'center' }}>
+                  正在加载收入类型...
+                </div>
+              ) : categoryError ? (
+                <div>
+                  <select className="select" disabled value="">
+                    <option value="">加载失败</option>
+                  </select>
+                  <div className="error-message" style={{ marginTop: '8px' }}>
+                    <span>⚠️</span>
+                    <span>{categoryError}</span>
+                    <button
+                      type="button"
+                      onClick={loadIncomeCategories}
+                      style={{
+                        marginLeft: '12px',
+                        background: 'var(--primary-color)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      重试
+                    </button>
+                  </div>
+                </div>
+              ) : incomeCategories.length === 0 ? (
+                <div style={{ padding: '16px 18px', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '1rem' }}>
+                  暂无可用收入类型
+                </div>
+              ) : (
+                <select
+                  className="select"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  required
+                >
+                  {incomeCategories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="input-group">
@@ -141,7 +206,7 @@ export default function AddIncome() {
             <button
               type="submit"
               className="btn btn-success btn-block"
-              disabled={loading}
+              disabled={loading || loadingCategories || !!categoryError || incomeCategories.length === 0}
               style={{ marginTop: '8px' }}
             >
               {loading ? '保存中...' : '💾 保存收入'}

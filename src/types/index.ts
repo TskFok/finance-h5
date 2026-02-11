@@ -65,6 +65,16 @@ export interface ExpenseCategory {
   id: number;
   name: string;
   sort: number;
+  color?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IncomeCategory {
+  id: number;
+  name: string;
+  sort: number;
+  color?: string;
   created_at: string;
   updated_at: string;
 }

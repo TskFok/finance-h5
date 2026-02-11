@@ -3598,6 +3598,52 @@
         }
       }
     },
+    "/api/v1/income-categories": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "获取所有可用的收入类型列表，供记录收入界面「收入类型」选择使用。返回完整的收入类型对象数组，按 sort 升序排列。\n\n返回的每个对象包含以下字段：\n- id (uint): 收入类型唯一标识符，主键\n- name (string): 收入类型名称，如「工资」\n- sort (int): 排序值，值越小越靠前\n- color (string): 显示颜色，如 #10b981\n- created_at (string): 创建时间，ISO 8601 格式\n- updated_at (string): 更新时间，ISO 8601 格式\n\n示例响应：\n{\"code\":200,\"message\":\"success\",\"data\":[{\"id\":1,\"name\":\"工资\",\"sort\":10,\"color\":\"#10b981\",\"created_at\":\"2026-02-11T15:38:55.071+08:00\",\"updated_at\":\"2026-02-11T15:38:55.071+08:00\"}]}",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "收入"
+        ],
+        "summary": "获取收入类型列表",
+        "responses": {
+          "200": {
+            "description": "获取成功，返回收入类型列表数组",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/api.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/models.IncomeCategory"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/api.Response"
+            }
+          }
+        }
+      }
+    },
     "/api/v1/incomes": {
       "get": {
         "security": [
@@ -4320,6 +4366,7 @@
         },
         "type": {
           "type": "string",
+          "description": "收入类型名称，可选值来自 api/v1/income-categories 接口返回的 data[].name",
           "example": "工资"
         }
       }
@@ -4696,6 +4743,36 @@
         },
         "updated_at": {
           "type": "string"
+        }
+      }
+    },
+    "models.IncomeCategory": {
+      "type": "object",
+      "description": "收入类型，记录收入界面的「收入类型」选项，来自 api/v1/income-categories 接口",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "收入类型唯一标识符"
+        },
+        "name": {
+          "type": "string",
+          "description": "收入类型名称，如「工资」"
+        },
+        "sort": {
+          "type": "integer",
+          "description": "排序值，值越小越靠前"
+        },
+        "color": {
+          "type": "string",
+          "description": "显示颜色，如 #10b981"
+        },
+        "created_at": {
+          "type": "string",
+          "description": "创建时间，ISO 8601 格式"
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "更新时间，ISO 8601 格式"
         }
       }
     },
