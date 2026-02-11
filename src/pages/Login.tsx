@@ -35,19 +35,33 @@ export default function Login() {
 
   return (
     <div className="page">
-      <div className="container" style={{ maxWidth: '400px', margin: '0 auto' }}>
+      <div className="app-bg-texture" />
+      <div className="app-bg-gradient" />
+      <div className="container" style={{ maxWidth: '400px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: '40px', marginTop: '60px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>💰</div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+          <div style={{
+            width: 64,
+            height: 64,
+            margin: '0 auto 16px',
+            borderRadius: 16,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <i className="fa-solid fa-wallet" style={{ fontSize: '28px', color: 'var(--text-muted)' }} />
+          </div>
+          <h1 className="font-display" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
             记账助手
           </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.125rem' }}>
+          <p className="font-tech" style={{ color: 'var(--text-muted)', fontSize: '0.95rem', letterSpacing: '0.05em' }}>
             轻松管理您的每一笔收支
           </p>
         </div>
 
         <div className="card">
-          <h2 style={{ fontSize: '1.75rem', marginBottom: '24px', textAlign: 'center' }}>
+          <h2 className="font-display" style={{ fontSize: '1.5rem', marginBottom: '24px', textAlign: 'center', color: 'var(--text-primary)' }}>
             登录
           </h2>
 
@@ -78,14 +92,14 @@ export default function Login() {
 
             {error && (
               <div className="error-message">
-                <span>⚠️</span>
+                <i className="fa-solid fa-circle-exclamation" />
                 <span>{error}</span>
               </div>
             )}
 
             <button
               type="submit"
-              className="btn btn-primary btn-block"
+              className="btn btn-primary btn-block metal-shimmer"
               disabled={loading}
               style={{ marginTop: '8px' }}
             >
@@ -94,11 +108,11 @@ export default function Login() {
           </form>
 
           <div style={{ marginTop: '24px', textAlign: 'center' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>还没有账号？</span>
+            <span style={{ color: 'var(--text-muted)' }}>还没有账号？</span>
             <Link
               to="/register"
               style={{
-                color: 'var(--primary-color)',
+                color: 'var(--accent-bg)',
                 textDecoration: 'none',
                 fontWeight: '600',
                 marginLeft: '8px'

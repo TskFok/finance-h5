@@ -105,7 +105,6 @@ export default function Register() {
         password: formData.password
       });
       if (response.code === 200 && response.data) {
-        // 注册成功后自动登录
         const loginResponse = await authApi.login({
           username: formData.username,
           password: formData.password
@@ -127,13 +126,27 @@ export default function Register() {
 
   return (
     <div className="page">
-      <div className="container" style={{ maxWidth: '400px', margin: '0 auto' }}>
+      <div className="app-bg-texture" />
+      <div className="app-bg-gradient" />
+      <div className="container" style={{ maxWidth: '400px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: '40px', marginTop: '40px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+          <div style={{
+            width: 64,
+            height: 64,
+            margin: '0 auto 16px',
+            borderRadius: 16,
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <i className="fa-solid fa-user-plus" style={{ fontSize: '28px', color: 'var(--text-muted)' }} />
+          </div>
+          <h1 className="font-display" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
             创建账号
           </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '16px' }}>
+          <p className="font-tech" style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
             {step === 'email' && '请输入您的邮箱'}
             {step === 'verify' && '请输入验证码'}
             {step === 'register' && '完善账号信息'}
@@ -143,7 +156,7 @@ export default function Register() {
         <div className="card">
           {step === 'email' && (
             <>
-              <h2 style={{ fontSize: '24px', marginBottom: '24px', textAlign: 'center' }}>
+              <h2 className="font-display" style={{ fontSize: '1.35rem', marginBottom: '24px', textAlign: 'center', color: 'var(--text-primary)' }}>
                 邮箱验证
               </h2>
               <form onSubmit={handleSendCode}>
@@ -161,24 +174,19 @@ export default function Register() {
 
                 {error && (
                   <div className="error-message">
-                    <span>⚠️</span>
+                    <i className="fa-solid fa-circle-exclamation" />
                     <span>{error}</span>
                   </div>
                 )}
 
                 {success && (
                   <div className="success-message">
-                    <span>✅</span>
+                    <i className="fa-solid fa-circle-check" />
                     <span>{success}</span>
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-block"
-                  disabled={loading}
-                  style={{ marginTop: '8px' }}
-                >
+                <button type="submit" className="btn btn-primary btn-block metal-shimmer" disabled={loading} style={{ marginTop: '8px' }}>
                   {loading ? '发送中...' : '发送验证码'}
                 </button>
               </form>
@@ -187,7 +195,7 @@ export default function Register() {
 
           {step === 'verify' && (
             <>
-              <h2 style={{ fontSize: '24px', marginBottom: '24px', textAlign: 'center' }}>
+              <h2 className="font-display" style={{ fontSize: '1.35rem', marginBottom: '24px', textAlign: 'center', color: 'var(--text-primary)' }}>
                 验证码验证
               </h2>
               <form onSubmit={handleVerifyCode}>
@@ -202,31 +210,26 @@ export default function Register() {
                     maxLength={6}
                     required
                   />
-                  <div style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  <div className="font-tech" style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-dim)' }}>
                     验证码已发送至: {formData.email}
                   </div>
                 </div>
 
                 {error && (
                   <div className="error-message">
-                    <span>⚠️</span>
+                    <i className="fa-solid fa-circle-exclamation" />
                     <span>{error}</span>
                   </div>
                 )}
 
                 {success && (
                   <div className="success-message">
-                    <span>✅</span>
+                    <i className="fa-solid fa-circle-check" />
                     <span>{success}</span>
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-block"
-                  disabled={loading}
-                  style={{ marginTop: '8px' }}
-                >
+                <button type="submit" className="btn btn-primary btn-block metal-shimmer" disabled={loading} style={{ marginTop: '8px' }}>
                   {loading ? '验证中...' : '验证验证码'}
                 </button>
 
@@ -235,12 +238,7 @@ export default function Register() {
                   className="btn btn-block"
                   disabled={countdown > 0 || loading}
                   onClick={handleSendCode}
-                  style={{
-                    marginTop: '12px',
-                    background: 'transparent',
-                    border: '2px solid var(--primary-color)',
-                    color: 'var(--primary-color)'
-                  }}
+                  style={{ marginTop: '12px' }}
                 >
                   {countdown > 0 ? `重新发送 (${countdown}s)` : '重新发送验证码'}
                 </button>
@@ -250,7 +248,7 @@ export default function Register() {
 
           {step === 'register' && (
             <>
-              <h2 style={{ fontSize: '24px', marginBottom: '24px', textAlign: 'center' }}>
+              <h2 className="font-display" style={{ fontSize: '1.35rem', marginBottom: '24px', textAlign: 'center', color: 'var(--text-primary)' }}>
                 完善信息
               </h2>
               <form onSubmit={handleRegister}>
@@ -296,17 +294,12 @@ export default function Register() {
 
                 {error && (
                   <div className="error-message">
-                    <span>⚠️</span>
+                    <i className="fa-solid fa-circle-exclamation" />
                     <span>{error}</span>
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-block"
-                  disabled={loading}
-                  style={{ marginTop: '8px' }}
-                >
+                <button type="submit" className="btn btn-primary btn-block metal-shimmer" disabled={loading} style={{ marginTop: '8px' }}>
                   {loading ? '注册中...' : '完成注册'}
                 </button>
               </form>
@@ -314,11 +307,11 @@ export default function Register() {
           )}
 
           <div style={{ marginTop: '24px', textAlign: 'center' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>已有账号？</span>
+            <span style={{ color: 'var(--text-muted)' }}>已有账号？</span>
             <Link
               to="/login"
               style={{
-                color: 'var(--primary-color)',
+                color: 'var(--accent-bg)',
                 textDecoration: 'none',
                 fontWeight: '600',
                 marginLeft: '8px'

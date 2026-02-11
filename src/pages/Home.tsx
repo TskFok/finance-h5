@@ -54,23 +54,15 @@ export default function Home() {
     setLoading(true);
     try {
       const params: any = { page: 1, page_size: 100 };
-      if (startTime) {
-        params.start_time = startTime;
-      }
-      if (endTime) {
-        params.end_time = endTime;
-      }
+      if (startTime) params.start_time = startTime;
+      if (endTime) params.end_time = endTime;
 
       if (activeTab === 'expense') {
         const response = await expenseApi.getList(params);
-        if (response.code === 200) {
-          setExpenses(response.data.list);
-        }
+        if (response.code === 200) setExpenses(response.data.list);
       } else {
         const response = await incomeApi.getList(params);
-        if (response.code === 200) {
-          setIncomes(response.data.list);
-        }
+        if (response.code === 200) setIncomes(response.data.list);
       }
     } catch (err) {
       console.error('加载数据失败', err);
@@ -94,11 +86,10 @@ export default function Home() {
     }
   };
 
-  // 快捷时间选择
   const setQuickFilter = (type: 'today' | 'week' | 'month' | 'all') => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+
     switch (type) {
       case 'today':
         setStartTime(formatDate(today.toISOString()));
@@ -136,13 +127,11 @@ export default function Home() {
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
-    
     setDeletingId(itemToDelete.id);
     try {
       if (itemToDelete.type === 'expense') {
         const response = await expenseApi.delete(itemToDelete.id);
         if (response.code === 200) {
-          // 刷新列表和统计数据
           await loadData();
           await loadSummary();
         } else {
@@ -151,7 +140,6 @@ export default function Home() {
       } else {
         const response = await incomeApi.delete(itemToDelete.id);
         if (response.code === 200) {
-          // 刷新列表和统计数据
           await loadData();
           await loadSummary();
         } else {
@@ -179,27 +167,26 @@ export default function Home() {
 
   const currentList = activeTab === 'expense' ? expenses : incomes;
   const total = activeTab === 'expense' ? totalExpense : totalIncome;
+  const isTodayFilter = startTime && endTime && startTime === endTime && startTime === formatDate(new Date().toISOString());
+  const isAllFilter = !startTime && !endTime;
 
   return (
     <div className="page">
-      {/* 头部 */}
-      <div className="card home-header-card" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', marginBottom: '20px' }}>
+      <div className="app-bg-texture" />
+      <div className="app-bg-gradient" />
+
+      {/* 头部卡片 */}
+      <div className="card" style={{ marginBottom: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 100, height: 100, background: 'linear-gradient(135deg, rgba(55,65,81,0.1) 0%, transparent 100%)', borderRadius: '0 0 0 100%', pointerEvents: 'none' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <div style={{ fontSize: '1rem', opacity: 0.9, marginBottom: '6px' }}>欢迎回来</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{user?.username || '用户'}</div>
+            <div className="font-tech" style={{ fontSize: '0.7rem', letterSpacing: '0.2em', color: 'var(--text-dim)', marginBottom: '4px' }}>欢迎回来</div>
+            <div className="font-display" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>{user?.username || '用户'}</div>
           </div>
           <button
             onClick={handleLogout}
-            style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              border: 'none',
-              color: 'white',
-              padding: '10px 18px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '1rem'
-            }}
+            className="btn"
+            style={{ padding: '8px 16px', fontSize: '0.9rem' }}
           >
             退出
           </button>
@@ -207,15 +194,15 @@ export default function Home() {
         <div className="home-summary-row">
           <div className="home-summary-col">
             <div className="home-summary-label">总支出</div>
-            <div className="home-summary-amount">{formatMoney(totalExpense)}</div>
+            <div className="home-summary-amount" style={{ color: 'var(--expense-color)' }}>{formatMoney(totalExpense)}</div>
           </div>
           <div className="home-summary-col">
             <div className="home-summary-label">总收入</div>
-            <div className="home-summary-amount">{formatMoney(totalIncome)}</div>
+            <div className="home-summary-amount" style={{ color: 'var(--income-color)' }}>{formatMoney(totalIncome)}</div>
           </div>
           <div className="home-summary-col">
             <div className="home-summary-label">净收入</div>
-            <div className="home-summary-amount">{formatMoney(totalIncome - totalExpense)}</div>
+            <div className="home-summary-amount" style={{ color: totalIncome - totalExpense >= 0 ? 'var(--income-color)' : 'var(--expense-color)' }}>{formatMoney(totalIncome - totalExpense)}</div>
           </div>
         </div>
       </div>
@@ -227,46 +214,37 @@ export default function Home() {
           className="btn"
           style={{
             flex: 1,
-            background: activeTab === 'expense' 
-              ? 'linear-gradient(135deg, var(--expense-color), #EE5A52)' 
-              : 'var(--card-bg)',
-            color: activeTab === 'expense' ? 'white' : 'var(--text-primary)',
-            border: activeTab === 'expense' ? 'none' : '2px solid var(--border-color)'
+            background: activeTab === 'expense' ? 'var(--expense-bg)' : 'var(--bg-card)',
+            color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--text-muted)',
+            border: activeTab === 'expense' ? '1px solid var(--expense-border)' : '1px solid var(--border-color)'
           }}
         >
-          💸 支出
+          <i className="fa-solid fa-arrow-down" style={{ marginRight: '6px', fontSize: '0.9rem' }} />
+          支出
         </button>
         <button
           onClick={() => setActiveTab('income')}
           className="btn"
           style={{
             flex: 1,
-            background: activeTab === 'income' 
-              ? 'linear-gradient(135deg, var(--income-color), #40C057)' 
-              : 'var(--card-bg)',
-            color: activeTab === 'income' ? 'white' : 'var(--text-primary)',
-            border: activeTab === 'income' ? 'none' : '2px solid var(--border-color)'
+            background: activeTab === 'income' ? 'var(--income-bg)' : 'var(--bg-card)',
+            color: activeTab === 'income' ? 'var(--income-color)' : 'var(--text-muted)',
+            border: activeTab === 'income' ? '1px solid var(--income-border)' : '1px solid var(--border-color)'
           }}
         >
-          💰 收入
+          <i className="fa-solid fa-arrow-up" style={{ marginRight: '6px', fontSize: '0.9rem' }} />
+          收入
         </button>
       </div>
 
       {/* 时间筛选 */}
       <div className="card" style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showFilter ? '16px' : '0' }}>
-          <div style={{ fontSize: '1.125rem', fontWeight: '600' }}>时间筛选</div>
+          <div className="font-tech" style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-muted)' }}>时间筛选</div>
           <button
             onClick={() => setShowFilter(!showFilter)}
-            style={{
-              background: 'var(--primary-color)',
-              color: 'white',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '1rem'
-            }}
+            className="btn btn-primary"
+            style={{ padding: '8px 16px', fontSize: '0.9rem' }}
           >
             {showFilter ? '收起' : '筛选'}
           </button>
@@ -274,97 +252,39 @@ export default function Home() {
 
         {showFilter && (
           <div>
-            {/* 快捷选项 */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setQuickFilter('today')}
-                className="btn"
-                style={{
-                  background: startTime && endTime && startTime === endTime && startTime === formatDate(new Date().toISOString())
-                    ? 'var(--primary-color)' : 'var(--card-bg)',
-                  color: startTime && endTime && startTime === endTime && startTime === formatDate(new Date().toISOString())
-                    ? 'white' : 'var(--text-primary)',
-                  border: '2px solid var(--border-color)',
-                  padding: '10px 16px',
-                  fontSize: '1rem'
-                }}
-              >
-                今天
-              </button>
-              <button
-                onClick={() => setQuickFilter('week')}
-                className="btn"
-                style={{
-                  background: 'var(--card-bg)',
-                  color: 'var(--text-primary)',
-                  border: '2px solid var(--border-color)',
-                  padding: '10px 16px',
-                  fontSize: '1rem'
-                }}
-              >
-                本周
-              </button>
-              <button
-                onClick={() => setQuickFilter('month')}
-                className="btn"
-                style={{
-                  background: 'var(--card-bg)',
-                  color: 'var(--text-primary)',
-                  border: '2px solid var(--border-color)',
-                  padding: '10px 16px',
-                  fontSize: '1rem'
-                }}
-              >
-                本月
-              </button>
-              <button
-                onClick={() => setQuickFilter('all')}
-                className="btn"
-                style={{
-                  background: !startTime && !endTime ? 'var(--primary-color)' : 'var(--card-bg)',
-                  color: !startTime && !endTime ? 'white' : 'var(--text-primary)',
-                  border: '2px solid var(--border-color)',
-                  padding: '10px 16px',
-                  fontSize: '1rem'
-                }}
-              >
-                全部
-              </button>
+              {(['today', 'week', 'month', 'all'] as const).map((type) => {
+                const labels = { today: '今天', week: '本周', month: '本月', all: '全部' };
+                const active = (type === 'today' && isTodayFilter) || (type === 'all' && isAllFilter);
+                return (
+                  <button
+                    key={type}
+                    onClick={() => setQuickFilter(type)}
+                    className="btn"
+                    style={{
+                      background: active ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
+                      color: active ? 'var(--text-primary)' : 'var(--text-muted)',
+                      border: active ? '1px solid var(--border-subtle)' : '1px solid var(--border-color)',
+                      padding: '10px 16px',
+                      fontSize: '0.95rem'
+                    }}
+                  >
+                    {labels[type]}
+                  </button>
+                );
+              })}
             </div>
-
-            {/* 自定义时间范围 */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div className="input-group" style={{ marginBottom: '0' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
                 <label className="input-label">开始时间</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  style={{ fontSize: '1.125rem' }}
-                />
+                <input type="date" className="input" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
               </div>
-              <div className="input-group" style={{ marginBottom: '0' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
                 <label className="input-label">结束时间</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  style={{ fontSize: '1.125rem' }}
-                />
+                <input type="date" className="input" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
               </div>
               {(startTime || endTime) && (
-                <button
-                  onClick={clearFilter}
-                  className="btn"
-                  style={{
-                    background: 'var(--card-bg)',
-                    color: 'var(--text-primary)',
-                    border: '2px solid var(--border-color)',
-                    marginTop: '8px'
-                  }}
-                >
+                <button onClick={clearFilter} className="btn" style={{ marginTop: '8px' }}>
                   清除筛选
                 </button>
               )}
@@ -372,16 +292,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* 显示当前筛选条件 */}
         {(startTime || endTime) && !showFilter && (
-          <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(74, 144, 226, 0.1)', borderRadius: '8px', fontSize: '0.9375rem' }}>
-            {startTime && endTime ? (
-              <span>筛选范围: {startTime} 至 {endTime}</span>
-            ) : startTime ? (
-              <span>从 {startTime} 开始</span>
-            ) : (
-              <span>至 {endTime} 结束</span>
-            )}
+          <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-tertiary)', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}>
+            {startTime && endTime ? `${startTime} 至 ${endTime}` : startTime ? `从 ${startTime} 开始` : `至 ${endTime} 结束`}
           </div>
         )}
       </div>
@@ -392,42 +305,40 @@ export default function Home() {
       ) : currentList.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">
-            {activeTab === 'expense' ? '💸' : '💰'}
+            <i className={`fa-solid ${activeTab === 'expense' ? 'fa-arrow-down' : 'fa-arrow-up'}`} />
           </div>
-          <div>暂无{activeTab === 'expense' ? '支出' : '收入'}记录</div>
+          <div style={{ marginBottom: '20px' }}>暂无{activeTab === 'expense' ? '支出' : '收入'}记录</div>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary metal-shimmer"
             onClick={() => navigate(activeTab === 'expense' ? '/expense/add' : '/income/add')}
-            style={{ marginTop: '20px' }}
           >
+            <i className="fa-solid fa-plus" style={{ marginRight: '8px' }} />
             添加第一条记录
           </button>
         </div>
       ) : (
         <>
           <div className="card" style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '12px' }}>
+            <div className="font-tech" style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '8px' }}>
               {activeTab === 'expense' ? '支出' : '收入'}总计
             </div>
-            <div className="home-list-total-amount" style={{ fontWeight: 'bold', color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--income-color)' }}>
+            <div className="home-list-total-amount font-display" style={{ color: activeTab === 'expense' ? 'var(--expense-color)' : 'var(--income-color)' }}>
               {formatMoney(total)}
             </div>
           </div>
 
           {currentList.map((item) => (
-            <div key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
+            <div key={item.id} className="list-item" style={{ display: 'flex', alignItems: 'flex-start' }}>
               <div className="list-item-icon">
-                <CategoryIcon 
-                  categoryName={activeTab === 'expense' ? (item as Expense).category : (item as Income).type} 
-                  size={28}
+                <CategoryIcon
+                  categoryName={activeTab === 'expense' ? (item as Expense).category : (item as Income).type}
+                  size={24}
                 />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="list-item-header">
                   <div className="list-item-title">
-                    {activeTab === 'expense' 
-                      ? (item as Expense).category 
-                      : (item as Income).type}
+                    {activeTab === 'expense' ? (item as Expense).category : (item as Income).type}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div className={`amount-badge ${activeTab === 'expense' ? 'amount-expense' : 'amount-income'}`}>
@@ -439,33 +350,26 @@ export default function Home() {
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: 'var(--danger-color)',
+                        color: 'var(--expense-color)',
                         cursor: deletingId === item.id ? 'not-allowed' : 'pointer',
                         padding: '4px 8px',
-                        fontSize: '1.25rem',
-                        opacity: deletingId === item.id ? 0.5 : 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: '32px',
-                        minHeight: '32px'
+                        fontSize: '1rem',
+                        opacity: deletingId === item.id ? 0.5 : 1
                       }}
                       title="删除"
                     >
-                      {deletingId === item.id ? '⏳' : '🗑️'}
+                      <i className="fa-solid fa-trash-can" />
                     </button>
                   </div>
                 </div>
                 <div className="list-item-meta">
-                  <div>
-                    {activeTab === 'expense' && (item as Expense).description && (
-                      <div style={{ marginTop: '4px', fontSize: '0.9375rem', color: 'var(--text-secondary)' }}>
-                        {(item as Expense).description}
-                      </div>
-                    )}
-                    <div style={{ marginTop: '4px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                      {formatDateTime(activeTab === 'expense' ? (item as Expense).expense_time : (item as Income).income_time)}
+                  {activeTab === 'expense' && (item as Expense).description && (
+                    <div style={{ marginTop: '4px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                      {(item as Expense).description}
                     </div>
+                  )}
+                  <div style={{ marginTop: '4px', color: 'var(--text-dim)', fontSize: '0.8rem' }}>
+                    {formatDateTime(activeTab === 'expense' ? (item as Expense).expense_time : (item as Income).income_time)}
                   </div>
                 </div>
               </div>
@@ -474,59 +378,37 @@ export default function Home() {
         </>
       )}
 
-      <BottomNav active="home" />
-
-      {/* 浮动按钮 */}
-      <button
-        className="fab"
-        onClick={() => navigate(activeTab === 'expense' ? '/expense/add' : '/income/add')}
-        title={`添加${activeTab === 'expense' ? '支出' : '收入'}`}
-      >
-        +
-      </button>
+      <BottomNav active="home" addTarget={activeTab} />
 
       {/* 删除确认对话框 */}
       {showDeleteConfirm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+        >
           <div className="card" style={{ maxWidth: '400px', width: '100%' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '16px' }}>
+            <div className="font-display" style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>
               确认删除
             </div>
-            <div style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+            <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
               确定要删除这条{activeTab === 'expense' ? '支出' : '收入'}记录吗？删除后无法恢复。
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                onClick={handleDeleteCancel}
-                className="btn"
-                style={{
-                  flex: 1,
-                  background: 'var(--card-bg)',
-                  color: 'var(--text-primary)',
-                  border: '2px solid var(--border-color)'
-                }}
-                disabled={deletingId !== null}
-              >
+              <button onClick={handleDeleteCancel} className="btn" style={{ flex: 1 }} disabled={deletingId !== null}>
                 取消
               </button>
-              <button
-                onClick={handleDeleteConfirm}
-                className="btn btn-danger"
-                style={{ flex: 1 }}
-                disabled={deletingId !== null}
-              >
+              <button onClick={handleDeleteConfirm} className="btn btn-danger" style={{ flex: 1 }} disabled={deletingId !== null}>
                 {deletingId !== null ? '删除中...' : '确认删除'}
               </button>
             </div>

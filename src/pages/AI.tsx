@@ -247,18 +247,7 @@ export default function AI() {
           <div className="list-item-title" style={{ fontSize: '1.25rem' }}>
             #{item?.id} {created ? `· ${formatCreatedAt(created)}` : ''}
           </div>
-          <button
-            onClick={() => deleteHistory(kind, item.id)}
-            style={{
-              background: 'transparent',
-              border: '2px solid var(--border-color)',
-              borderRadius: 12,
-              padding: '10px 14px',
-              cursor: 'pointer',
-              color: 'var(--danger-color)',
-              fontWeight: 700
-            }}
-          >
+          <button className="btn" onClick={() => deleteHistory(kind, item.id)} style={{ color: 'var(--expense-color)', padding: '10px 14px' }}>
             删除
           </button>
         </div>
@@ -272,10 +261,11 @@ export default function AI() {
             <div style={{ 
               padding: 12, 
               borderRadius: 12, 
-              background: 'rgba(74, 144, 226, 0.1)', 
-              fontSize: '1.1rem',
+              background: 'var(--bg-tertiary)', 
+              fontSize: '1rem',
               whiteSpace: 'pre-wrap',
-              lineHeight: 1.5
+              lineHeight: 1.5,
+              border: '1px solid var(--border-color)'
             }}>
               {item.user_text}
             </div>
@@ -291,12 +281,13 @@ export default function AI() {
           )}
           <div style={{ 
             color: 'var(--text-secondary)', 
-            fontSize: '1.1rem', 
+            fontSize: '1rem', 
             whiteSpace: 'pre-wrap',
             lineHeight: 1.5,
             padding: kind === 'chat' ? 12 : 0,
             borderRadius: kind === 'chat' ? 12 : 0,
-            background: kind === 'chat' ? 'rgba(47, 191, 113, 0.1)' : 'transparent'
+            background: kind === 'chat' ? 'var(--income-bg)' : 'transparent',
+            border: kind === 'chat' ? '1px solid var(--income-border)' : 'none'
           }}>
             {expanded ? preview : `${preview}`.slice(0, 200)}
             {!expanded && preview.length > 200 ? '…' : ''}
@@ -305,18 +296,7 @@ export default function AI() {
         
         {preview.length > 200 && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-            <button
-              onClick={() => setExpandedKey(expanded ? null : key)}
-              style={{
-                background: 'transparent',
-                border: '2px solid var(--border-color)',
-                borderRadius: 12,
-                padding: '10px 14px',
-                cursor: 'pointer',
-                color: 'var(--text-primary)',
-                fontWeight: 700
-              }}
-            >
+            <button className="btn" onClick={() => setExpandedKey(expanded ? null : key)} style={{ padding: '10px 14px' }}>
               {expanded ? '收起' : '展开'}
             </button>
           </div>
@@ -327,20 +307,21 @@ export default function AI() {
 
   return (
     <div className="page" style={{ padding: '0', width: '100%', paddingBottom: '110px' }}>
-      <div style={{ width: '100%', maxWidth: '100%', padding: '20px 16px', margin: '0 auto' }}>
-        <div className="card" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-          <div style={{ fontSize: '1.75rem', fontWeight: 900 }}>AI 助手</div>
-          <div style={{ opacity: 0.95, marginTop: 8, fontSize: '1rem' }}>
+      <div className="app-bg-texture" />
+      <div className="app-bg-gradient" />
+      <div style={{ width: '100%', maxWidth: '100%', padding: '20px 20px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className="card" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div className="font-display" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>AI 助手</div>
+          <div className="font-tech" style={{ color: 'var(--text-muted)', marginTop: 8, fontSize: '0.9rem' }}>
             选择模型后，可进行 <b>AI聊天</b> 或 <b>AI分析</b>（均为流式输出）
           </div>
           <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
             <div>
-              <div style={{ fontSize: '1rem', opacity: 0.9, marginBottom: 6 }}>AI模型</div>
+              <label className="input-label">AI模型</label>
               <select
                 className="select"
                 value={modelId ?? ''}
                 onChange={(e) => setModelId(Number(e.target.value))}
-                style={{ paddingLeft: 16 }}
               >
                 {models.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -349,7 +330,7 @@ export default function AI() {
                 ))}
               </select>
               {selectedModel?.base_url && (
-                <div style={{ marginTop: 8, fontSize: '0.95rem', opacity: 0.9 }}>
+                <div className="font-tech" style={{ marginTop: 8, fontSize: '0.85rem', color: 'var(--text-dim)' }}>
                   Base URL：{selectedModel.base_url}
                 </div>
               )}
@@ -360,33 +341,33 @@ export default function AI() {
                 onClick={() => setTab('chat')}
                 style={{
                   flex: 1,
-                  background: tab === 'chat' ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.12)',
-                  color: 'white',
-                  border: '1px solid rgba(255,255,255,0.25)'
+                  background: tab === 'chat' ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
+                  color: tab === 'chat' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  border: tab === 'chat' ? '1px solid var(--border-subtle)' : '1px solid var(--border-color)'
                 }}
               >
-                💬 AI聊天
+                <i className="fa-solid fa-comment" style={{ marginRight: '8px' }} />AI聊天
               </button>
               <button
                 className="btn"
                 onClick={() => setTab('analysis')}
                 style={{
                   flex: 1,
-                  background: tab === 'analysis' ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.12)',
-                  color: 'white',
-                  border: '1px solid rgba(255,255,255,0.25)'
+                  background: tab === 'analysis' ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
+                  color: tab === 'analysis' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  border: tab === 'analysis' ? '1px solid var(--border-subtle)' : '1px solid var(--border-color)'
                 }}
               >
-                🧠 AI分析
+                <i className="fa-solid fa-brain" style={{ marginRight: '8px' }} />AI分析
               </button>
             </div>
           </div>
         </div>
 
         {error && (
-          <div className="card" style={{ background: 'rgba(255,255,255,0.95)' }}>
+          <div className="card">
             <div className="error-message">
-              <span>⚠️</span>
+              <i className="fa-solid fa-circle-exclamation" />
               <span>{error}</span>
             </div>
           </div>
@@ -395,12 +376,12 @@ export default function AI() {
         {/* Chat Tab */}
         {tab === 'chat' && (
           <>
-            <div className="card" style={{ background: 'rgba(255,255,255,0.95)' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: 12 }}>对话</div>
+            <div className="card">
+              <div className="font-tech" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: 12, color: 'var(--text-muted)' }}>对话</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {chatMessages.length === 0 ? (
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
                       试试问：我这个月消费结构怎么样？我有哪些可以优化的支出？
                     </div>
                   ) : (
@@ -409,15 +390,15 @@ export default function AI() {
                         key={idx}
                         style={{
                           padding: 14,
-                          borderRadius: 16,
-                          background: m.role === 'user' ? 'rgba(74,144,226,0.10)' : 'rgba(47,191,113,0.10)',
-                          border: '2px solid rgba(0,0,0,0.04)'
+                          borderRadius: 12,
+                          background: m.role === 'user' ? 'var(--bg-tertiary)' : 'var(--income-bg)',
+                          border: '1px solid var(--border-color)'
                         }}
                       >
-                        <div style={{ fontWeight: 900, marginBottom: 6, fontSize: '1.1rem' }}>
+                        <div className="font-display" style={{ fontWeight: 600, marginBottom: 6, fontSize: '1rem', color: 'var(--text-secondary)' }}>
                           {m.role === 'user' ? '你' : 'AI'}
                         </div>
-                        <div style={{ whiteSpace: 'pre-wrap', fontSize: '1.15rem', lineHeight: 1.5 }}>
+                        <div style={{ whiteSpace: 'pre-wrap', fontSize: '1rem', lineHeight: 1.5, color: 'var(--text-primary)' }}>
                           {m.text || (m.role === 'assistant' && chatStreaming ? '…' : '')}
                         </div>
                       </div>
@@ -433,34 +414,25 @@ export default function AI() {
                   rows={3}
                 />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={sendChat} disabled={chatStreaming || !modelId}>
+                  <button className="btn btn-primary metal-shimmer" style={{ flex: 1 }} onClick={sendChat} disabled={chatStreaming || !modelId}>
                     {chatStreaming ? '生成中…' : '发送'}
                   </button>
-                  <button
-                    className="btn"
-                    style={{ flex: 1, background: 'var(--card-bg)', border: '2px solid var(--border-color)', color: 'var(--text-primary)' }}
-                    onClick={stopChat}
-                    disabled={!chatStreaming}
-                  >
+                  <button className="btn" style={{ flex: 1 }} onClick={stopChat} disabled={!chatStreaming}>
                     停止
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="card" style={{ background: 'rgba(255,255,255,0.95)' }}>
+            <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontSize: '1.35rem', fontWeight: 900 }}>聊天历史</div>
-                <button
-                  onClick={() => loadHistory('chat', chatPage)}
-                  style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '10px 14px', borderRadius: 12, cursor: 'pointer' }}
-                  disabled={historyLoading || !modelId}
-                >
+                <div className="font-tech" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-muted)' }}>聊天历史</div>
+                <button className="btn btn-primary" style={{ padding: '10px 14px', fontSize: '0.9rem' }} onClick={() => loadHistory('chat', chatPage)} disabled={historyLoading || !modelId}>
                   {historyLoading ? '加载中…' : '刷新'}
                 </button>
               </div>
               {chatHistory.length === 0 ? (
-                <div style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>暂无聊天历史（发送一次聊天后会自动保存）</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>暂无聊天历史（发送一次聊天后会自动保存）</div>
               ) : (
                 <>
                   {chatHistory.map((it) => renderHistoryItem('chat', it))}
@@ -473,7 +445,6 @@ export default function AI() {
                         loadHistory('chat', next);
                       }}
                       disabled={chatPage <= 1 || historyLoading}
-                      style={{ background: 'var(--card-bg)', border: '2px solid var(--border-color)', color: 'var(--text-primary)' }}
                     >
                       上一页
                     </button>
@@ -485,7 +456,6 @@ export default function AI() {
                         loadHistory('chat', next);
                       }}
                       disabled={historyLoading || chatHistory.length < 20}
-                      style={{ background: 'var(--card-bg)', border: '2px solid var(--border-color)', color: 'var(--text-primary)' }}
                     >
                       下一页
                     </button>
@@ -502,8 +472,8 @@ export default function AI() {
         {/* Analysis Tab */}
         {tab === 'analysis' && (
           <>
-            <div className="card" style={{ background: 'rgba(255,255,255,0.95)' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: 12 }}>消费AI分析</div>
+            <div className="card">
+              <div className="font-tech" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: 12, color: 'var(--text-muted)' }}>消费AI分析</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label">开始日期</label>
@@ -519,28 +489,24 @@ export default function AI() {
                 <button className="btn btn-success" style={{ flex: 1 }} onClick={runAnalysis} disabled={analysisStreaming || !modelId}>
                   {analysisStreaming ? '分析中…' : '开始分析'}
                 </button>
-                <button
-                  className="btn"
-                  style={{ flex: 1, background: 'var(--card-bg)', border: '2px solid var(--border-color)', color: 'var(--text-primary)' }}
-                  onClick={stopAnalysis}
-                  disabled={!analysisStreaming}
-                >
+                <button className="btn" style={{ flex: 1 }} onClick={stopAnalysis} disabled={!analysisStreaming}>
                   停止
                 </button>
               </div>
 
               <div style={{ marginTop: 14 }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: 10 }}>分析结果（流式）</div>
+                <div className="font-tech" style={{ fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.05em', marginBottom: 10, color: 'var(--text-muted)' }}>分析结果（流式）</div>
                 <div
                   style={{
                     padding: 14,
-                    borderRadius: 16,
-                    background: 'rgba(47,191,113,0.08)',
-                    border: '2px solid rgba(0,0,0,0.04)',
+                    borderRadius: 12,
+                    background: 'var(--income-bg)',
+                    border: '1px solid var(--income-border)',
                     minHeight: 120,
                     whiteSpace: 'pre-wrap',
-                    fontSize: '1.15rem',
-                    lineHeight: 1.55
+                    fontSize: '1rem',
+                    lineHeight: 1.55,
+                    color: 'var(--text-primary)'
                   }}
                 >
                   {analysisText || (analysisStreaming ? '…' : '点击“开始分析”后，这里会显示AI对消费的分析建议。')}
@@ -548,19 +514,15 @@ export default function AI() {
               </div>
             </div>
 
-            <div className="card" style={{ background: 'rgba(255,255,255,0.95)' }}>
+            <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontSize: '1.35rem', fontWeight: 900 }}>分析历史</div>
-                <button
-                  onClick={() => loadHistory('analysis', analysisPage)}
-                  style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '10px 14px', borderRadius: 12, cursor: 'pointer' }}
-                  disabled={historyLoading || !modelId}
-                >
+                <div className="font-tech" style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-muted)' }}>分析历史</div>
+                <button className="btn btn-primary" style={{ padding: '10px 14px', fontSize: '0.9rem' }} onClick={() => loadHistory('analysis', analysisPage)} disabled={historyLoading || !modelId}>
                   {historyLoading ? '加载中…' : '刷新'}
                 </button>
               </div>
               {analysisHistory.length === 0 ? (
-                <div style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>暂无分析历史（分析完成后会自动保存）</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>暂无分析历史（分析完成后会自动保存）</div>
               ) : (
                 <>
                   {analysisHistory.map((it) => renderHistoryItem('analysis', it))}
@@ -573,7 +535,6 @@ export default function AI() {
                         loadHistory('analysis', next);
                       }}
                       disabled={analysisPage <= 1 || historyLoading}
-                      style={{ background: 'var(--card-bg)', border: '2px solid var(--border-color)', color: 'var(--text-primary)' }}
                     >
                       上一页
                     </button>
@@ -585,7 +546,6 @@ export default function AI() {
                         loadHistory('analysis', next);
                       }}
                       disabled={historyLoading || analysisHistory.length < 20}
-                      style={{ background: 'var(--card-bg)', border: '2px solid var(--border-color)', color: 'var(--text-primary)' }}
                     >
                       下一页
                     </button>

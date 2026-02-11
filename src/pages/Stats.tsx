@@ -57,11 +57,9 @@ export default function Stats() {
     setLoading(true);
     try {
       const params: any = { range_type: rangeType };
-      if (rangeType === 'month') {
-        params.year_month = yearMonth;
-      } else if (rangeType === 'year') {
-        params.year = year;
-      } else {
+      if (rangeType === 'month') params.year_month = yearMonth;
+      else if (rangeType === 'year') params.year = year;
+      else {
         params.start_time = startDate;
         params.end_time = endDate;
       }
@@ -69,11 +67,8 @@ export default function Stats() {
         params.categories = selectedCategories.join(',');
       }
       const res = await expenseApi.getDetailedStatistics(params);
-      if (res.code === 200) {
-        setData(res.data);
-      } else {
-        setError(res.message || '获取统计失败');
-      }
+      if (res.code === 200) setData(res.data);
+      else setError(res.message || '获取统计失败');
     } catch (e: any) {
       setError(e?.response?.data?.message || '获取统计失败，请稍后重试');
     } finally {
@@ -88,19 +83,18 @@ export default function Stats() {
 
   const chartSource = useMemo(() => {
     const stats = data?.category_stats ?? [];
-    const sorted = [...stats].sort((a, b) => b.total - a.total);
-    return sorted;
+    return [...stats].sort((a, b) => b.total - a.total);
   }, [data]);
 
   const pieOption = useMemo(() => {
-    const seriesData = chartSource.map((s) => ({
-      name: s.category,
-      value: s.total
-    }));
+    const seriesData = chartSource.map((s) => ({ name: s.category, value: s.total }));
     return {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
+        backgroundColor: 'rgba(15,15,15,0.95)',
+        borderColor: '#333',
+        textStyle: { color: '#d1d5db' },
         formatter: (p: any) => {
           const name = p?.name ?? '';
           const value = p?.value ?? 0;
@@ -113,7 +107,7 @@ export default function Stats() {
       legend: {
         type: 'scroll',
         bottom: 0,
-        textStyle: { color: '#2C3E50', fontSize: 14 }
+        textStyle: { color: '#9ca3af', fontSize: 12 }
       },
       series: [
         {
@@ -124,16 +118,11 @@ export default function Stats() {
           avoidLabelOverlap: true,
           itemStyle: {
             borderRadius: 10,
-            borderColor: '#fff',
+            borderColor: '#0f0f0f',
             borderWidth: 2
           },
-          label: {
-            // 关闭扇区上的文字，避免显示“类别\\n百分比”
-            show: false
-          },
-          labelLine: {
-            show: false
-          },
+          label: { show: false },
+          labelLine: { show: false },
           data: seriesData
         }
       ]
@@ -149,12 +138,14 @@ export default function Stats() {
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
+        backgroundColor: 'rgba(15,15,15,0.95)',
+        borderColor: '#333',
+        textStyle: { color: '#d1d5db' },
         formatter: (params: any) => {
           const p0 = params?.[0];
-          const p1 = params?.[1];
           const name = p0?.axisValue ?? '';
           const amount = p0?.data ?? 0;
-          const count = p1?.data ?? 0;
+          const count = params?.[1]?.data ?? 0;
           return `${name}<br/>金额：${formatMoney(Number(amount))}<br/>笔数：${count}`;
         }
       },
@@ -165,21 +156,21 @@ export default function Stats() {
         axisLabel: {
           interval: 0,
           rotate: x.length > 6 ? 30 : 0,
-          color: '#2C3E50',
-          fontSize: 12
-        }
+          color: '#9ca3af',
+          fontSize: 11
+        },
+        axisLine: { lineStyle: { color: '#333' } }
       },
       yAxis: [
         {
           type: 'value',
-          axisLabel: {
-            color: '#7F8C8D',
-            formatter: (v: number) => `${v}`
-          }
+          axisLabel: { color: '#6b7280' },
+          splitLine: { lineStyle: { color: '#222' } }
         },
         {
           type: 'value',
-          axisLabel: { color: '#7F8C8D' }
+          axisLabel: { color: '#6b7280' },
+          splitLine: { show: false }
         }
       ],
       series: [
@@ -198,8 +189,8 @@ export default function Stats() {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: '#66D9A3' },
-                { offset: 1, color: '#2FBF71' }
+                { offset: 0, color: '#4ade80' },
+                { offset: 1, color: '#22c55e' }
               ]
             }
           }
@@ -212,8 +203,8 @@ export default function Stats() {
           smooth: true,
           symbol: 'circle',
           symbolSize: 8,
-          lineStyle: { width: 3, color: '#4A90E2' },
-          itemStyle: { color: '#4A90E2' }
+          lineStyle: { width: 3, color: '#f3f4f6' },
+          itemStyle: { color: '#f3f4f6' }
         }
       ]
     };
@@ -227,64 +218,52 @@ export default function Stats() {
 
   return (
     <div className="page" style={{ padding: '0', width: '100%', paddingBottom: '110px' }}>
-      <div style={{ width: '100%', maxWidth: '100%', padding: '20px 16px', margin: '0 auto' }}>
+      <div className="app-bg-texture" />
+      <div className="app-bg-gradient" />
+
+      <div style={{ width: '100%', maxWidth: '100%', padding: '20px 20px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* 顶部栏 */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
           <button
             onClick={() => navigate('/home')}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '2rem',
-              cursor: 'pointer',
-              color: 'white',
-              marginRight: '12px',
-              padding: '8px',
-              minWidth: '44px',
-              minHeight: '44px'
-            }}
+            className="btn"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '10px 14px', minWidth: '44px', minHeight: '44px' }}
           >
-            ←
+            <i className="fa-solid fa-arrow-left" style={{ color: 'var(--text-primary)' }} />
           </button>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: 'white', fontSize: '1.75rem', fontWeight: 800 }}>统计</div>
-            <div style={{ color: 'rgba(255,255,255,0.9)', marginTop: 6, fontSize: '1rem' }}>{rangeTitle}</div>
+          <div style={{ flex: 1, marginLeft: '16px' }}>
+            <div className="font-display" style={{ color: 'var(--text-primary)', fontSize: '1.5rem', fontWeight: 600 }}>统计</div>
+            <div className="font-tech" style={{ color: 'var(--text-muted)', marginTop: 4, fontSize: '0.9rem' }}>{rangeTitle}</div>
           </div>
           <button
             onClick={fetchStats}
             className="btn"
-            style={{
-              background: 'rgba(255,255,255,0.18)',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.25)',
-              padding: '10px 14px',
-              borderRadius: 12,
-              fontSize: '1rem'
-            }}
+            style={{ padding: '10px 14px', fontSize: '0.9rem' }}
+            disabled={loading}
           >
             {loading ? '刷新中…' : '刷新'}
           </button>
         </div>
 
-        {/* 时间范围选择 */}
-        <div className="card" style={{ background: 'rgba(255,255,255,0.95)' }}>
+        {/* 时间范围 */}
+        <div className="card">
           <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
             {([
-              { key: 'month', label: '按月' },
-              { key: 'year', label: '按年' },
-              { key: 'custom', label: '自定义' }
-            ] as { key: RangeType; label: string }[]).map((t) => (
+              { key: 'month' as RangeType, label: '按月' },
+              { key: 'year' as RangeType, label: '按年' },
+              { key: 'custom' as RangeType, label: '自定义' }
+            ]).map((t) => (
               <button
                 key={t.key}
                 onClick={() => setRangeType(t.key)}
                 className="btn"
                 style={{
                   flex: 1,
-                  background: rangeType === t.key ? 'linear-gradient(135deg, #66D9A3, #2FBF71)' : 'var(--card-bg)',
-                  color: rangeType === t.key ? 'white' : 'var(--text-primary)',
-                  border: rangeType === t.key ? 'none' : '2px solid var(--border-color)',
+                  background: rangeType === t.key ? 'var(--bg-tertiary)' : 'var(--bg-secondary)',
+                  color: rangeType === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
+                  border: rangeType === t.key ? '1px solid var(--border-subtle)' : '1px solid var(--border-color)',
                   padding: '12px 0',
-                  borderRadius: 14
+                  borderRadius: 12
                 }}
               >
                 {t.label}
@@ -302,14 +281,7 @@ export default function Stats() {
           {rangeType === 'year' && (
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label className="input-label">选择年份</label>
-              <input
-                type="number"
-                className="input"
-                value={year}
-                min={2000}
-                max={2100}
-                onChange={(e) => setYear(e.target.value)}
-              />
+              <input type="number" className="input" value={year} min={2000} max={2100} onChange={(e) => setYear(e.target.value)} />
             </div>
           )}
 
@@ -328,36 +300,12 @@ export default function Stats() {
         </div>
 
         {/* 类别多选 */}
-        <div className="card" style={{ background: 'rgba(255,255,255,0.95)', marginTop: 16 }}>
+        <div className="card" style={{ marginTop: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>消费类别（可多选）</div>
+            <div className="font-tech" style={{ fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-muted)' }}>消费类别（可多选）</div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={selectAll}
-                style={{
-                  background: 'var(--card-bg)',
-                  border: '2px solid var(--border-color)',
-                  padding: '8px 12px',
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  fontSize: '1rem'
-                }}
-              >
-                全选
-              </button>
-              <button
-                onClick={clearAll}
-                style={{
-                  background: 'var(--card-bg)',
-                  border: '2px solid var(--border-color)',
-                  padding: '8px 12px',
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  fontSize: '1rem'
-                }}
-              >
-                清空
-              </button>
+              <button onClick={selectAll} className="btn" style={{ padding: '8px 12px', fontSize: '0.9rem' }}>全选</button>
+              <button onClick={clearAll} className="btn" style={{ padding: '8px 12px', fontSize: '0.9rem' }}>清空</button>
             </div>
           </div>
 
@@ -368,67 +316,63 @@ export default function Stats() {
                 <button
                   key={c.id}
                   onClick={() => toggleCategory(c.name)}
+                  className="btn"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
-                    padding: '12px 12px',
-                    borderRadius: 14,
-                    border: active ? '2px solid rgba(47,191,113,0.9)' : '2px solid var(--border-color)',
-                    background: active ? 'rgba(47,191,113,0.10)' : 'var(--card-bg)',
+                    padding: '12px',
+                    borderRadius: 12,
+                    border: active ? '1px solid var(--income-border)' : '1px solid var(--border-color)',
+                    background: active ? 'var(--income-bg)' : 'var(--bg-secondary)',
                     cursor: 'pointer',
                     textAlign: 'left'
                   }}
                 >
-                  <div className="category-icon" style={{ background: active ? 'rgba(47,191,113,0.18)' : 'rgba(74, 144, 226, 0.12)' }}>
-                    <CategoryIcon categoryName={c.name} size={22} />
+                  <div className="category-icon" style={{ background: active ? 'rgba(34,197,94,0.2)' : 'var(--bg-tertiary)' }}>
+                    <CategoryIcon categoryName={c.name} size={20} />
                   </div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>{c.name}</div>
+                  <div className="font-display" style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{c.name}</div>
                 </button>
               );
             })}
           </div>
 
-          <button
-            onClick={fetchStats}
-            className="btn btn-primary btn-block"
-            style={{ marginTop: 16 }}
-            disabled={loading}
-          >
+          <button onClick={fetchStats} className="btn btn-primary btn-block metal-shimmer" style={{ marginTop: 16 }} disabled={loading}>
             {loading ? '生成中…' : '生成统计'}
           </button>
         </div>
 
-        {/* 汇总卡片 */}
-        <div className="card" style={{ background: 'rgba(255,255,255,0.95)', marginTop: 16 }}>
+        {/* 汇总 */}
+        <div className="card" style={{ marginTop: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: 6 }}>总金额</div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#2FBF71' }}>
+              <div className="font-tech" style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: 6 }}>总金额</div>
+              <div className="font-display" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--income-color)' }}>
                 {formatMoney(data?.total_amount ?? 0)}
               </div>
             </div>
             <div style={{ flex: 1, textAlign: 'right' }}>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: 6 }}>总笔数</div>
-              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#4A90E2' }}>{data?.total_count ?? 0}</div>
+              <div className="font-tech" style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginBottom: 6 }}>总笔数</div>
+              <div className="font-display" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>{data?.total_count ?? 0}</div>
             </div>
           </div>
           {error && (
             <div className="error-message" style={{ marginTop: 12 }}>
-              <span>⚠️</span>
+              <i className="fa-solid fa-circle-exclamation" />
               <span>{error}</span>
             </div>
           )}
         </div>
 
         {/* 图表 */}
-        <div className="card" style={{ background: 'rgba(255,255,255,0.95)', marginTop: 16 }}>
-          <div style={{ fontSize: '1.35rem', fontWeight: 900, marginBottom: 12 }}>饼图：分类占比</div>
+        <div className="card" style={{ marginTop: 16 }}>
+          <div className="font-tech" style={{ fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 12 }}>饼图：分类占比</div>
           <ReactECharts style={{ height: 380, width: '100%' }} option={pieOption as any} notMerge lazyUpdate />
         </div>
 
-        <div className="card" style={{ background: 'rgba(255,255,255,0.95)', marginTop: 16, marginBottom: 24 }}>
-          <div style={{ fontSize: '1.35rem', fontWeight: 900, marginBottom: 12 }}>柱状图：分类金额（折线：笔数）</div>
+        <div className="card" style={{ marginTop: 16, marginBottom: 24 }}>
+          <div className="font-tech" style={{ fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 12 }}>柱状图：分类金额（折线：笔数）</div>
           <ReactECharts style={{ height: 420, width: '100%' }} option={barOption as any} notMerge lazyUpdate />
         </div>
       </div>
@@ -437,4 +381,3 @@ export default function Stats() {
     </div>
   );
 }
-
